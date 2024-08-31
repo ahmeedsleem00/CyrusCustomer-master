@@ -1,0 +1,47 @@
+﻿@model IEnumerable<CyrusCustomer.Domain.Models.Customer>
+@{
+    ViewData["Title"] = "Customer List";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+
+<p>
+    <a asp-action="Create" style="text-decoration : none; color:darkslategrey">Create New</a>
+    <a asp-action="Upload" class="btn btn-primary" style="margin-left: 10px;">Upload Excel</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Tax ID</th>
+            <th>Phone</th>
+            <th>Version Updated</th>
+            <th>User Updated</th>
+            <th>Update Date</th>
+            <th>Notes</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.TaxId</td>
+                <td>@item.Phone</td>
+                <td>@item.VersionUpdated</td>
+                <td>@item.UserUpdated</td>  
+                <td>@item.UpdateDate</td>
+                <td>@item.Notes</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
