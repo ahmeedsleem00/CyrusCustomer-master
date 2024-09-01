@@ -26,7 +26,7 @@ namespace CyrusCustomer.Spreadsheet
                         TaxId = worksheet.Cells[row, 2].Text, 
                         Phone = worksheet.Cells[row, 3].Text, 
                         BranchName = worksheet.Cells[row, 4].Text, 
-                        VersionUpdated = worksheet.Cells[row, 5].Text, 
+                        ResponsiblePerson = worksheet.Cells[row, 5].Text, 
                         UserUpdated = worksheet.Cells[row, 6].Text, 
                         UpdateDate = DateTime.Parse(worksheet.Cells[row, 7].Text), 
                         Notes = worksheet.Cells[row, 8].Text 

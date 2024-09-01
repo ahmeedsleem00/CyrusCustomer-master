@@ -48,7 +48,7 @@ namespace CyrusCustomer.DAL
 
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Credential> Credentials { get; set; }
-        public DbSet<Branche> Branches { get; set; }
+        public DbSet<Branch> Branches { get; set; }
 
     }
 }

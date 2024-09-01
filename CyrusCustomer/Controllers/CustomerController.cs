@@ -20,6 +20,8 @@ namespace CyrusCustomer.Controllers
             this._context = context;
         }
 
+        #region Index and Upload and ViewBranches
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -32,6 +34,26 @@ namespace CyrusCustomer.Controllers
         {
             return View();
         }
+
+        public async Task<IActionResult> ViewBranches(int customerId)
+        {
+            var customers = await _context.Customers.Include(c => c.Branches)
+                                               .FirstOrDefaultAsync(c => c.Id == customerId);
+            if(customers == null)
+            {
+                return NotFound();
+            }
+            var viewModel = customers.Branches.Select(b => new BranchViewModel
+            {
+                BranchName = b.BranchName,
+                ResponsiblePerson = customers.ResponsiblePerson, // Or logic to fetch
+                CustomerName = customers.Name
+            }).ToList();
+            return View(customers.Branches);
+        }
+        #endregion
+
+        #region Details
 
         public async Task<IActionResult> Details(int? id)
         {
@@ -47,7 +69,9 @@ namespace CyrusCustomer.Controllers
             return View(customer);
 
         }
+        #endregion
 
+        #region Create
 
         public IActionResult Create()
         {
@@ -68,6 +92,9 @@ namespace CyrusCustomer.Controllers
             return View(customer);
 
         }
+        #endregion
+
+        #region Edit Methods
 
         public async Task<IActionResult> Edit(int? id)
         {
@@ -116,8 +143,10 @@ namespace CyrusCustomer.Controllers
             }
             return View(customer);
         }
-      
+        #endregion
 
+        #region Deleted Methods
+       
             public async Task<IActionResult> Delete(int id)
             {
                 //if (id == null) { return NotFound(); }
@@ -142,6 +171,22 @@ namespace CyrusCustomer.Controllers
             {
                 return _context.Customers.Any(e => e.Id == id);
             }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAll() 
+        {
+            var allCustomers = _context.Customers.ToList();
+            _context.Customers.RemoveRange(allCustomers);
+          await _context.SaveChangesAsync();
+
+            ViewBag.Message = "All customer data has been deleted.";
+            return RedirectToAction("Index", "Home");
+
+        }
+        #endregion
+
+        #region Excel Sheet Methods
 
         public IActionResult DownloadBranchesFileExcel()
         {
@@ -174,65 +219,70 @@ namespace CyrusCustomer.Controllers
 
                     var rowCount = worksheet.Dimension.Rows;
 
+                    // Use a dictionary to group branch names by customer
+                    var customerBranches = new Dictionary<string, List<string>>();
+
                     for (int row = 2; row <= rowCount; row++)
                     {
                         var customerName = worksheet.Cells[row, 1].Text.Trim();
                         var taxId = worksheet.Cells[row, 2].Text.Trim();
-                        var phone = worksheet.Cells[row, 3].Text.Trim();
-                        var branchName = worksheet.Cells[row, 4].Text.Trim();
-                        var versionUpdated = worksheet.Cells[row, 5].Text.Trim();
+                        var branchName = worksheet.Cells[row, 3].Text.Trim();
+                        var responsiblePerson = worksheet.Cells[row, 4].Text.Trim();
+                        var phone = worksheet.Cells[row, 5].Text.Trim();
                         var userUpdated = worksheet.Cells[row, 6].Text.Trim();
-
-                        DateTime updateDate;
                         var updateDateCell = worksheet.Cells[row, 7].Text.Trim();
-                        if (!string.IsNullOrEmpty(updateDateCell) && DateTime.TryParse(updateDateCell, out updateDate))
+                        DateTime.TryParse(updateDateCell, out DateTime updateDate);
+                      
+                        // Group branches by customer
+                        if (!customerBranches.ContainsKey(customerName))
                         {
-                            // Valid date
+                            customerBranches[customerName] = new List<string>();
                         }
-                        else
-                        {
-                            updateDate = DateTime.MinValue; // Set to a default value or handle appropriately
-                                                            // Or you can skip processing this row if date is required
-                        }
+                        customerBranches[customerName].Add(branchName);
 
-                        var notes = worksheet.Cells[row, 8].Text.Trim();
-                        var email = worksheet.Cells[row, 9].Text.Trim();
-                        var password = worksheet.Cells[row, 10].Text.Trim();
-
+                        // Check if customer already exists in the database
                         var existingCustomer = await _context.Customers
+                            .Include(c => c.Branches)
                             .FirstOrDefaultAsync(c => c.TaxId == taxId);
 
                         if (existingCustomer != null)
                         {
+                            // Update existing customer details
                             existingCustomer.Name = customerName;
                             existingCustomer.Phone = phone;
-                            existingCustomer.BranchName = branchName;
-                            existingCustomer.VersionUpdated = versionUpdated;
+                            existingCustomer.ResponsiblePerson = responsiblePerson;
                             existingCustomer.UserUpdated = userUpdated;
                             existingCustomer.UpdateDate = updateDate;
-                            existingCustomer.Notes = notes;
-                            existingCustomer.Credentials = new List<Credential>
-                    {
-                        new Credential { Email = email, Password = password }
-                    };
+                            //existingCustomer.Notes = notes;
+
+                            // Add new branches to existing customer
+                            if (existingCustomer.Branches.All(b => b.BranchName != branchName))
+                            {
+                                var newBranch = new Branch { BranchName = branchName };
+                                existingCustomer.Branches.Add(newBranch);
+                            }
 
                             _context.Customers.Update(existingCustomer);
                         }
                         else
                         {
+                            // Create a new customer with branches
                             var newCustomer = new Customer
                             {
                                 Name = customerName,
                                 TaxId = taxId,
                                 Phone = phone,
-                                BranchName = branchName,
-                                VersionUpdated = versionUpdated,
+                                ResponsiblePerson = responsiblePerson,
                                 UserUpdated = userUpdated,
                                 UpdateDate = updateDate,
-                                Notes = notes,
-                                Credentials = new List<Credential>
+                                //Notes = notes,
+                        //        Credentials = new List<Credential>
+                        //{
+                        //    new Credential { Email = email, Password = password }
+                        //},
+                                Branches = new List<Branch>
                         {
-                            new Credential { Email = email, Password = password }
+                            new Branch { BranchName = branchName }
                         }
                             };
 
@@ -276,6 +326,8 @@ namespace CyrusCustomer.Controllers
             return RedirectToAction("Index", "Customer");
 
         }
+        #endregion
+
 
 
     }

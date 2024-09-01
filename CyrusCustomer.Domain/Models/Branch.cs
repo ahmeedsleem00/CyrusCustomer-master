@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CyrusCustomer.Domain.Models
 {
-    public class Branche
+    public class Branch
     {
         public int Id { get; set; }
         public string BranchName { get; set; }

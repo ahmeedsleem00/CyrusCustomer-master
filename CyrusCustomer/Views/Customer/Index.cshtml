@@ -9,18 +9,25 @@
 <p>
     <a asp-action="Create" style="text-decoration : none; color:darkslategrey">Create New</a>
     <a asp-action="Upload" class="btn btn-primary" style="margin-left: 10px;">Upload Excel</a>
+
+    @using (Html.BeginForm("DeleteAll", "Customer", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete all customer data?');">
+            Delete All Customer Data
+        </button>
+    }
 </p>
 
 <table class="table">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Tax ID</th>
-            <th>Phone</th>
-            <th>Version Updated</th>
-            <th>User Updated</th>
-            <th>Update Date</th>
-            <th>Notes</th>
+            <th>إسم الشركة</th>
+            <th>تسجيل ضريبي</th>
+            <th>الشخص المسئول</th>
+            <th>رقم موبايل</th>
+            <th>تاريخ الفاتوره</th>
+      
             <th></th>
         </tr>
     </thead>
@@ -31,15 +38,19 @@
             <tr>
                 <td>@item.Name</td>
                 <td>@item.TaxId</td>
+                <td>@item.ResponsiblePerson</td>
                 <td>@item.Phone</td>
-                <td>@item.VersionUpdated</td>
                 <td>@item.UserUpdated</td>  
-                <td>@item.UpdateDate</td>
-                <td>@item.Notes</td>
+          
+            
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <a asp-action="Delete" >Delete</a>
+                    <a  asp-action="ViewBranches" asp-route-customerId="@item.Id" class="btn btn-primary">
+                        View Branches
+                    </a>
+
                 </td>
             </tr>
         }

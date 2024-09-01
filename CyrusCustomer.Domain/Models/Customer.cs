@@ -12,14 +12,14 @@ namespace CyrusCustomer.Domain.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string? TaxId { get; set; }
+        public string? TaxId { get; set; }  
         public string? Phone { get; set; }
-        public string BranchName { get; set; }
-        public string? VersionUpdated { get; set; }
+        public string? BranchName { get; set; }
+        public string? ResponsiblePerson { get; set; }
         public string? UserUpdated { get; set; }
         public DateTime UpdateDate { get; set; }
         public string? Notes { get; set; }
         public virtual ICollection<Credential>? Credentials { get; set; }
-        public virtual ICollection<Branche>? Branches { get; set; }
+        public virtual ICollection<Branch>? Branches { get; set; }
     }
 }

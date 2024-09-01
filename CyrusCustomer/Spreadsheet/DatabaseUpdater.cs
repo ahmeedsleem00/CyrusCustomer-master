@@ -24,7 +24,7 @@ namespace CyrusCustomer.Spreadsheet
                     existingCustomer.Name = customer.Name;
                     existingCustomer.Phone = customer.Phone;
                     existingCustomer.BranchName = customer.BranchName;
-                    existingCustomer.VersionUpdated = customer.VersionUpdated;
+                    existingCustomer.ResponsiblePerson = customer.ResponsiblePerson;
                     existingCustomer.UserUpdated = customer.UserUpdated;
                     existingCustomer.UpdateDate = customer.UpdateDate;
                     existingCustomer.Notes = customer.Notes;

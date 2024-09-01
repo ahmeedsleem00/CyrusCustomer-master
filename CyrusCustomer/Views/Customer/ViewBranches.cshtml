@@ -1,0 +1,27 @@
+﻿@model IEnumerable<CyrusCustomer.Domain.Models.Branch>
+@{
+    ViewData["Title"] = "ViewBranches";
+}
+
+
+<h2>Branches for @Model.FirstOrDefault()?.Customer.Name</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Branch Name</th>
+            <th>Company Name</th>
+            <th>Responsible Person</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var branch in Model)
+        {
+            <tr>
+                <td>@branch.BranchName</td>
+                <td>@branch.Customer.Name</td>
+                <td>@branch.Customer.ResponsiblePerson</td>
+            </tr>
+        }
+    </tbody>
+</table>
