@@ -35,6 +35,7 @@ namespace CyrusCustomer.Controllers
             return View();
         }
 
+      
         public async Task<IActionResult> ViewBranches(int customerId)
         {
             var customers = await _context.Customers.Include(c => c.Branches)
@@ -45,11 +46,16 @@ namespace CyrusCustomer.Controllers
             }
             var viewModel = customers.Branches.Select(b => new BranchViewModel
             {
+                Id = b.Id,
                 BranchName = b.BranchName,
                 ResponsiblePerson = customers.ResponsiblePerson, // Or logic to fetch
-                CustomerName = customers.Name
+                CustomerName = b.BranchName,
+                UserUpdated = b.UserUpdated,
+                UpdateDate = b.UpdateDate,
+                Notes = b.Notes
+
             }).ToList();
-            return View(customers.Branches);
+            return View(viewModel);
         }
         #endregion
 
@@ -111,9 +117,41 @@ namespace CyrusCustomer.Controllers
             return View(customer);
         }
 
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Edit(int id, [Bind("Id,Name,TaxId,Phone,VersionUpdated,UserUpdated,UpdateDate,Notes")] Customer customer)
+        //{
+        //    if (id != customer.Id)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            _context.Update(customer);
+        //            await _context.SaveChangesAsync();
+        //        }
+        //        catch (DbUpdateConcurrencyException)
+        //        {
+        //            if (!CustomerExists(customer.Id))
+        //            {
+        //                return NotFound();
+        //            }
+        //            else
+        //            {
+        //                throw new Exception(message: "There Was an Error, Return to Developers Team");
+        //            }
+
+        //        }
+
+        //    }
+        //    return View(customer);
+        //}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,TaxId,Phone,VersionUpdated,UserUpdated,UpdateDate,Notes")] Customer customer)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,TaxId,Phone,ResponsiblePerson,BranchName,UserUpdated,UpdateDate,Notes,UpdateConfirmed")] Customer customer)
         {
             if (id != customer.Id)
             {
@@ -124,7 +162,22 @@ namespace CyrusCustomer.Controllers
             {
                 try
                 {
-                    _context.Update(customer);
+                    // Retrieve the existing customer from the database
+                    var existingCustomer = await _context.Customers.FindAsync(id);
+
+                    if (existingCustomer == null)
+                    {
+                        return NotFound();
+                    }
+
+                    // Update the existing customer properties
+           
+                    existingCustomer.UserUpdated = customer.UserUpdated;
+                    existingCustomer.UpdateDate = customer.UpdateDate;
+                    existingCustomer.Notes = customer.Notes;
+                    existingCustomer.UpdateConfirmed = customer.UpdateConfirmed; // Update this property
+
+                    // Save changes to the database
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -135,19 +188,105 @@ namespace CyrusCustomer.Controllers
                     }
                     else
                     {
-                        throw new Exception(message: "There Was an Error, Return to Developers Team");
+                        throw new Exception("There was an error, please contact the development team.");
                     }
-
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception or handle it as needed
+                    throw new Exception("An unexpected error occurred: " + ex.Message);
                 }
 
+                // Redirect to the customer details page or another appropriate action
+                return RedirectToAction("Index");
             }
+
+            // If model state is not valid, return the same view with the current model state
             return View(customer);
         }
+
+
+        // GET: Branch/EditBranches/5
+        public async Task<IActionResult> EditBranches(int id, int customerId)
+        {
+            var branch = await _context.Branches.FirstOrDefaultAsync(b => b.Id == id);
+
+            if (branch == null)
+            {
+                return NotFound();
+            }
+            ViewBag.CustomerId = customerId;
+            return View(branch);
+        }
+
+        // POST: Branch/EditBranches/5
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditBranches(int id, [Bind("Id,BranchName,UserUpdated,UpdateDate,Notes,CustomerId,UpdateConfirmed")] BranchViewModel branchViewModel)
+        {
+            if (id != branchViewModel.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Retrieve the Branch entity from the database
+                    var branch = await _context.Branches.FindAsync(branchViewModel.Id);
+
+                    if (branch == null)
+                    {
+                        return NotFound();
+                    }
+
+                    // Update the Branch entity with data from the ViewModel
+                    branch.BranchName = branchViewModel.BranchName;
+                    branch.UserUpdated = branchViewModel.UserUpdated;
+                    branch.UpdateDate = branchViewModel.UpdateDate;
+                    branch.Notes = branchViewModel.Notes;
+                    branch.UpdateConfirmed = branchViewModel.UpdateConfirmed; //
+
+
+
+
+                    // Save changes to the database
+                    _context.Update(branch);
+                    await _context.SaveChangesAsync();
+
+                    // Redirect to the ViewBranches action
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!BranchExists(branchViewModel.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+              //  return RedirectToAction(nameof(ViewBranches), new { customerId = branchViewModel.CustomerId });
+
+            }
+            return RedirectToAction("Index","Customer");
+            //  return View(branchViewModel);
+
+        }
+
+        private bool BranchExists(int id)
+        {
+            return _context.Branches.Any(e => e.Id == id);
+        }
+
         #endregion
 
         #region Deleted Methods
-       
-            public async Task<IActionResult> Delete(int id)
+
+        public async Task<IActionResult> Delete(int id)
             {
                 //if (id == null) { return NotFound(); }
                 var customer = await _context.Customers.FirstOrDefaultAsync(m => m.Id == id);
@@ -174,27 +313,38 @@ namespace CyrusCustomer.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteAll() 
+        public async Task<IActionResult> DeleteAll()
         {
-            var allCustomers = _context.Customers.ToList();
+            // Load all customers along with their related branches
+            var allCustomers = await _context.Customers.Include(c => c.Branches).ToListAsync();
+
+            // Delete all branches
+            foreach (var customer in allCustomers)
+            {
+                _context.Branches.RemoveRange(customer.Branches);
+            }
+
+            // Delete all customers
             _context.Customers.RemoveRange(allCustomers);
-          await _context.SaveChangesAsync();
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
 
             ViewBag.Message = "All customer data has been deleted.";
             return RedirectToAction("Index", "Home");
-
         }
+
         #endregion
 
         #region Excel Sheet Methods
 
-        public IActionResult DownloadBranchesFileExcel()
-        {
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/spreedsheet/Update_Sheet.xlsx");
+        //public IActionResult DownloadBranchesFileExcel()
+        //{
+        //    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/spreedsheet/Update_Sheet.xlsx");
 
-            var fileBytes = System.IO.File.ReadAllBytes(filePath);
-            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreedsheet.sheet", "Update_Sheet.xlsx");
-        }
+        //    var fileBytes = System.IO.File.ReadAllBytes(filePath);
+        //    return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreedsheet.sheet", "Update_Sheet.xlsx");
+        //}
         private async Task UpdateCustomersFromExcel(IFormFile file)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -221,6 +371,7 @@ namespace CyrusCustomer.Controllers
 
                     // Use a dictionary to group branch names by customer
                     var customerBranches = new Dictionary<string, List<string>>();
+                    var customerData = new List<(string CustomerName, string TaxId, string BranchName, string ResponsiblePerson, string Phone, string UserUpdated, DateTime UpdateDate)>();
 
                     for (int row = 2; row <= rowCount; row++)
                     {
@@ -232,7 +383,9 @@ namespace CyrusCustomer.Controllers
                         var userUpdated = worksheet.Cells[row, 6].Text.Trim();
                         var updateDateCell = worksheet.Cells[row, 7].Text.Trim();
                         DateTime.TryParse(updateDateCell, out DateTime updateDate);
-                      
+
+                        customerData.Add((customerName, taxId, branchName, responsiblePerson, phone, userUpdated, updateDate));
+
                         // Group branches by customer
                         if (!customerBranches.ContainsKey(customerName))
                         {
@@ -240,72 +393,136 @@ namespace CyrusCustomer.Controllers
                         }
                         customerBranches[customerName].Add(branchName);
 
-                        // Check if customer already exists in the database
+                        //// Group branches by customer TaxId
+                        //if (!customerBranches.ContainsKey(taxId))
+                        //{
+                        //    customerBranches[taxId] = new List<string>();
+                        //}
+
+                        //if (!customerBranches[taxId].Contains(branchName))
+                        //{
+                        //    customerBranches[taxId].Add(branchName);
+                        //}
+
+                        var existingCustomers = await _context.Customers.Include(c => c.Branches).ToListAsync();
+
+                        var joinedData = from excelData in customerData
+                                         join dbCustomer in existingCustomers
+                                         on excelData.TaxId equals dbCustomer.TaxId into joined
+                                         from customer in joined.DefaultIfEmpty()
+                                         select new
+                                         {
+                                             ExcelData = excelData,
+                                             DbCustomer = customer
+                                         };
+
                         var existingCustomer = await _context.Customers
                             .Include(c => c.Branches)
                             .FirstOrDefaultAsync(c => c.TaxId == taxId);
 
-                        if (existingCustomer != null)
-                        {
-                            // Update existing customer details
-                            existingCustomer.Name = customerName;
-                            existingCustomer.Phone = phone;
-                            existingCustomer.ResponsiblePerson = responsiblePerson;
-                            existingCustomer.UserUpdated = userUpdated;
-                            existingCustomer.UpdateDate = updateDate;
-                            //existingCustomer.Notes = notes;
+                        //    if (existingCustomer != null)
+                        //    {
+                        //        // Update existing customer details
+                        //        existingCustomer.Name = customerName;
+                        //        existingCustomer.Phone = phone;
+                        //        existingCustomer.ResponsiblePerson = responsiblePerson;
+                        //        existingCustomer.UserUpdated = userUpdated;
+                        //        existingCustomer.UpdateDate = updateDate;
+                        //        //existingCustomer.Notes = notes;
 
-                            // Add new branches to existing customer
-                            if (existingCustomer.Branches.All(b => b.BranchName != branchName))
+                        //        // Add new branches to existing customer
+                        //        if (existingCustomer.Branches.All(b => b.BranchName != branchName))
+                        //        {
+                        //            var newBranch = new Branch { BranchName = branchName };
+                        //            existingCustomer.Branches.Add(newBranch);
+                        //        }
+
+                        //        _context.Customers.Update(existingCustomer);
+                        //    }
+                        //    else
+                        //    {
+                        //        // Create a new customer with branches
+                        //        var newCustomer = new Customer
+                        //        {
+                        //            Name = customerName,
+                        //            TaxId = taxId,
+                        //            Phone = phone,
+                        //            ResponsiblePerson = responsiblePerson,
+                        //            UserUpdated = userUpdated,
+                        //            UpdateDate = updateDate,
+                        //            //Notes = notes,
+                        //    //        Credentials = new List<Credential>
+                        //    //{
+                        //    //    new Credential { Email = email, Password = password }
+                        //    //},
+                        //            Branches = new List<Branch>
+                        //    {
+                        //        new Branch { BranchName = branchName }
+                        //    }
+                        //        };
+
+                        //        _context.Customers.Add(newCustomer);
+                        //    }
+                        //}
+
+
+                        foreach (var item in joinedData)
+                        {
+                            if (item.DbCustomer != null)
                             {
-                                var newBranch = new Branch { BranchName = branchName };
-                                existingCustomer.Branches.Add(newBranch);
+                                // Existing customer, update details
+                                item.DbCustomer.Name = item.ExcelData.CustomerName;
+                                item.DbCustomer.Phone = item.ExcelData.Phone;
+                                item.DbCustomer.ResponsiblePerson = item.ExcelData.ResponsiblePerson;
+                                item.DbCustomer.UserUpdated = item.ExcelData.UserUpdated;
+                                item.DbCustomer.UpdateDate = item.ExcelData.UpdateDate;
+
+
+                                // Add new branch if not exists
+                                if (item.DbCustomer.Branches.All(b => b.BranchName != item.ExcelData.BranchName))
+                                {
+                                    item.DbCustomer.Branches.Add(new Branch { BranchName = item.ExcelData.BranchName });
+                                }
+
+                                _context.Customers.Update(item.DbCustomer);
                             }
-
-                            _context.Customers.Update(existingCustomer);
-                        }
-                        else
-                        {
-                            // Create a new customer with branches
-                            var newCustomer = new Customer
+                            else
                             {
-                                Name = customerName,
-                                TaxId = taxId,
-                                Phone = phone,
-                                ResponsiblePerson = responsiblePerson,
-                                UserUpdated = userUpdated,
-                                UpdateDate = updateDate,
-                                //Notes = notes,
-                        //        Credentials = new List<Credential>
-                        //{
-                        //    new Credential { Email = email, Password = password }
-                        //},
-                                Branches = new List<Branch>
+                                // New customer
+                                var newCustomer = new Customer
+                                {
+                                    Name = item.ExcelData.CustomerName,
+                                    TaxId = item.ExcelData.TaxId,
+                                    Phone = item.ExcelData.Phone,
+                                    ResponsiblePerson = item.ExcelData.ResponsiblePerson,
+                                    UserUpdated = item.ExcelData.UserUpdated,
+                                    UpdateDate = item.ExcelData.UpdateDate,
+                                    Branches = new List<Branch>
+            {
+                new Branch { BranchName = item.ExcelData.BranchName }
+            }
+                                };
+
+                                _context.Customers.Add(newCustomer);
+                            }
+                        }
+
+                        try
                         {
-                            new Branch { BranchName = branchName }
+                            await _context.SaveChangesAsync();
+                            Console.WriteLine("Data saved successfully.");
                         }
-                            };
-
-                            _context.Customers.Add(newCustomer);
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error occurred: " + ex.Message);
                         }
-                    }
-
-                    try
-                    {
-                        await _context.SaveChangesAsync();
-                        Console.WriteLine("Data saved successfully.");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Error occurred: " + ex.Message);
                     }
                 }
+
+                var customers = await _context.Customers.ToListAsync();
+              
             }
-
-            var customers = await _context.Customers.ToListAsync();
-            Console.WriteLine("Number of customers in DB: " + customers.Count);
         }
-
 
         [HttpPost]
         public async Task<IActionResult> UploadExcel(IFormFile file)

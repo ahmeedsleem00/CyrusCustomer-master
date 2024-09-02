@@ -1,17 +1,20 @@
-﻿@model IEnumerable<CyrusCustomer.Domain.Models.Branch>
+﻿@model IEnumerable<CyrusCustomer.Models.BranchViewModel>
+
 @{
-    ViewData["Title"] = "ViewBranches";
+    ViewData["Title"] = "View Branches";
 }
 
-
-<h2>Branches for @Model.FirstOrDefault()?.Customer.Name</h2>
+<h2>Branches for @Model.FirstOrDefault()?.CustomerName</h2>
 
 <table class="table">
     <thead>
         <tr>
             <th>Branch Name</th>
-            <th>Company Name</th>
             <th>Responsible Person</th>
+            <th>User Updated</th>
+            <th>Update Date</th>
+            <th>Notes</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -19,9 +22,18 @@
         {
             <tr>
                 <td>@branch.BranchName</td>
-                <td>@branch.Customer.Name</td>
-                <td>@branch.Customer.ResponsiblePerson</td>
+                <td>@branch.ResponsiblePerson</td>
+                <td>@branch.UserUpdated</td>
+                <td>@branch.UpdateDate.ToString("yyyy-MM-dd")</td>
+                <td>@branch.Notes</td>
+                <td>
+                    <a asp-action="EditBranches" asp-route-id="@branch.Id" class="btn btn-primary">Edit</a>
+                </td>
             </tr>
         }
     </tbody>
 </table>
+
+<div>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

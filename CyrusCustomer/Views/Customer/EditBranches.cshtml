@@ -1,0 +1,52 @@
+﻿@model CyrusCustomer.Domain.Models.Branch
+
+@{
+    ViewData["Title"] = "EditBranches";
+}
+
+<h1>Edit Branches</h1>
+
+
+<form asp-action="EditBranches" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" name="CustomerId" value="@ViewBag.CustomerId" />
+    <div class="form-group">
+        <label asp-for="BranchName" class="control-label"></label>
+        <input asp-for="BranchName" class="form-control" />
+        <span asp-validation-for="BranchName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="UserUpdated" class="control-label"></label>
+        <input asp-for="UserUpdated" class="form-control" />
+        <span asp-validation-for="UserUpdated" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label asp-for="UpdateDate" class="control-label"></label>
+        <input asp-for="UpdateDate" class="form-control" type="date" />
+        <span asp-validation-for="UpdateDate" class="text-danger"></span>
+    </div>
+
+
+
+    <div class="form-group">
+        <label asp-for="Notes" class="control-label"></label>
+        <textarea asp-for="Notes" class="form-control"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="UpdateConfirmed" class="control-label">Confirm Update</label>
+        <input asp-for="UpdateConfirmed" type="checkbox" />
+        <span asp-validation-for="UpdateConfirmed" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Save" class="btn btn-primary" />
+    </div>
+</form> 
+
+<div>
+    <a asp-action="Index" class="btn btn-dark">Back to List</a>
+</div>

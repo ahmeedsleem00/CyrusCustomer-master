@@ -7,7 +7,7 @@
 
 
 <p>
-    <a asp-action="Create" style="text-decoration : none; color:darkslategrey">Create New</a>
+    <a asp-action="Create" style="text-decoration : none;" class="btn btn-dark">Create New</a>
     <a asp-action="Upload" class="btn btn-primary" style="margin-left: 10px;">Upload Excel</a>
 
     @using (Html.BeginForm("DeleteAll", "Customer", FormMethod.Post))
@@ -19,7 +19,7 @@
     }
 </p>
 
-<table class="table">
+<table class="table table-striped">
     <thead>
         <tr>
             <th>إسم الشركة</th>
@@ -44,10 +44,10 @@
           
             
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" >Delete</a>
-                    <a  asp-action="ViewBranches" asp-route-customerId="@item.Id" class="btn btn-primary">
+                    <a asp-action="Edit" class="btn btn-secondary" asp-route-id="@item.Id">Edit</a>
+                    <a asp-action="Details" class="btn btn-success" asp-route-id="@item.Id">Details</a>
+                    <a asp-action="Delete" class="btn btn-danger" >Delete</a>
+                    <a  asp-action="ViewBranches" asp-route-customerId="@item.Id" class="btn btn-dark m-auto">
                         View Branches
                     </a>
 
