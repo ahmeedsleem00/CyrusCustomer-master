@@ -4,6 +4,7 @@ using CyrusCustomer.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CyrusCustomer.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240903115418_AddNewInTable")]
+    partial class AddNewInTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -165,30 +167,9 @@ namespace CyrusCustomer.DAL.Migrations
                     b.Property<string>("BranchName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CharteredAccountant")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("CharteredAccountantPhone")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Contractor")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("ContractorPhoneNumber")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("CountOfBranches")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("InternalAccountant")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("InternalAccountantPhone")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Month")
                         .IsRequired()
@@ -205,11 +186,7 @@ namespace CyrusCustomer.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ResponsiblePerson")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
 
                     b.Property<string>("TaxId")
                         .HasColumnType("nvarchar(max)");

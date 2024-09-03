@@ -1,5 +1,6 @@
 ﻿using CyrusCustomer.DAL;
 using CyrusCustomer.Domain.Models;
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Microsoft.EntityFrameworkCore;
 
 namespace CyrusCustomer.Spreadsheet
@@ -21,6 +22,9 @@ namespace CyrusCustomer.Spreadsheet
                                                      .FirstOrDefaultAsync(x => x.TaxId == customer.TaxId);
                 if (existingCustomer != null)
                 {
+                    existingCustomer.Year = customer.Year;
+                    existingCustomer.Month = customer.Month;
+                    existingCustomer.CountOfBranches = customer.CountOfBranches;
                     existingCustomer.Name = customer.Name;
                     existingCustomer.Phone = customer.Phone;
                     existingCustomer.BranchName = customer.BranchName;
@@ -28,6 +32,14 @@ namespace CyrusCustomer.Spreadsheet
                     existingCustomer.UserUpdated = customer.UserUpdated;
                     existingCustomer.UpdateDate = customer.UpdateDate;
                     existingCustomer.Notes = customer.Notes;
+                    existingCustomer.Contractor = customer.Contractor;
+                    existingCustomer.ContractorPhoneNumber = customer.ContractorPhoneNumber;
+                    existingCustomer.InternalAccountant = customer.InternalAccountant;
+                    existingCustomer.InternalAccountantPhone = customer.InternalAccountantPhone;
+                    existingCustomer.CharteredAccountant = customer.CharteredAccountant;
+                    existingCustomer.CharteredAccountantPhone = customer.CharteredAccountantPhone;
+                    existingCustomer.Status = customer.Status;
+
                 }
                 else
                 {

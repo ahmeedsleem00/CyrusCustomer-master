@@ -15,7 +15,24 @@ namespace CyrusCustomer.Domain.Models
         public string? TaxId { get; set; }  
         public string? Phone { get; set; }
         public string? BranchName { get; set; }
-        public string? ResponsiblePerson { get; set; } 
+        public string ResponsiblePerson { get; set; } = "1";
+        public string Year { get; set; }
+        public string Month { get; set; }
+
+        //update new column from here
+        public string Contractor { get; set; }
+        public string ContractorPhoneNumber { get; set; } = "0";
+
+
+        //Added Default value if any of this properties return null from excel sheet
+        public string InternalAccountant { get ; set ; } = "0";
+        public string InternalAccountantPhone { get; set; } = "0";
+        public string CharteredAccountant { get; set; } = "0";
+        public string CharteredAccountantPhone { get; set; } 
+        public bool Status { get; set; } //  is check box 
+
+        public string CountOfBranches { get; set; } = "1";  
+        //end of update
         public string? UserUpdated { get; set; }
         public bool UpdateConfirmed { get; set; }
         public DateTime UpdateDate { get; set; } = DateTime.Today;

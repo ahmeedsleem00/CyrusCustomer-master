@@ -19,14 +19,26 @@
     }
 </p>
 
+<!-- Search Form -->
+<form asp-action="Index" method="get">
+    <div class="form-group">
+        <input type="text" name="searchString" class="form-control" placeholder="Search by Customer Name, Tax ID , Year , Month">
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>إسم الشركة</th>
-            <th>تسجيل ضريبي</th>
-            <th>الشخص المسئول</th>
-            <th>رقم موبايل</th>
-            <th>تاريخ الفاتوره</th>
+            <th>تاريخ الفاتورة (السنوي)</th>
+            <th>تارخ الفاتور (الشهر)</th>
+            <th>سجل ضريبي</th>
+            <th> عدد الفروع</th>
+            <th> اسم العميل</th>
+       @*      <th>رقم تليفون المتعاقد</th>
+            <th>المتعاقد</th>
+            <th> رقم التليفون</th> *@
       
             <th></th>
         </tr>
@@ -36,11 +48,14 @@
         @foreach (var item in Model)
         {
             <tr>
+                <td>@item.Year</td>
+                <td>@item.Month</td>
+                <td>@item.CountOfBranches</td>
                 <td>@item.Name</td>
                 <td>@item.TaxId</td>
-                <td>@item.ResponsiblePerson</td>
+              @*   <td>@item.ResponsiblePerson</td>
                 <td>@item.Phone</td>
-                <td>@item.UserUpdated</td>  
+                <td>@item.UserUpdated</td>  *@ 
           
             
                 <td>
