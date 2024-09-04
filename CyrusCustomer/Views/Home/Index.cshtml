@@ -14,18 +14,24 @@
 </div> *@
 
 <center>
-    <h1>Welcome to the Home Page</h1>
+    <h3>Welcome to The Home Page</h3>
+    <h1>Cyrus Customer Management System</h1>
 
-    @if (SignInManager.IsSignedIn(User))
-    {
-        <form asp-controller="Account" asp-action="Logout" method="post">
+     @if (SignInManager.IsSignedIn(User))
+    {@*      @if (User.Identity.IsAuthenticated && User.Identity.Name == "admin@Cyrus.com")
+        {
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary">Register</a>
+
+        }   *@
+      @*   <form asp-controller="Account" asp-action="Logout" method="post">
             <button type="submit" class="btn btn-danger">Logout</button>
-        </form>
+        </form> *@
+
     }
     else
     {
         <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Login</a>
-        <a asp-controller="Account" asp-action="Register" class="btn btn-secondary">Register</a>
-    }
+      
+    } 
 </center>
 

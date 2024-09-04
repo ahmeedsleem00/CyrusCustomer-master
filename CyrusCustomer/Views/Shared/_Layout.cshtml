@@ -23,19 +23,34 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link"  asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-primary text-white" href="@Url.Action("Index", "Customer")" style="margin-left: 10px;">Customer List</a>
-                        </li>
+                            <a class="nav-link " href="@Url.Action("Index", "Customer")" style="margin-left: 10px;">Customer List</a>
+                        </li >
+                        <ul class="navbar-nav mr-auto">
+                            <!-- Other nav items -->
+                            @if (User.Identity.IsAuthenticated && User.Identity.Name == "admin@Cyrus.com")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
+                                </li>
+                            }
+                        </ul>
+
+
+                    </ul>
+             
+
                         @if (SignInManager.IsSignedIn(User))
                         {
 
                             <form asp-controller="Account" asp-action="Logout" method="post">
-                                <button type="submit" class="btn btn-danger ms-auto">Logout</button>
+                                <button type="submit" class="ms-auto btn btn-white  text-secondary">Logout</button>
                             </form>
+
                         }
-                    </ul>
+
                 </div>
             </div>
         </nav>

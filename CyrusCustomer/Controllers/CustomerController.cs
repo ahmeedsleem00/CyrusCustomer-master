@@ -22,21 +22,47 @@ namespace CyrusCustomer.Controllers
         }
 
         #region Index and Upload and ViewBranches
+        public async Task<IActionResult> Index()
+        {
+            // Get the current logged-in user's email
+            var userEmail = User.Identity.Name;
+
+            // Retrieve the corresponding credential/user from the database
+            var user = await _context.Credentials.FirstOrDefaultAsync(c => c.Email == userEmail);
+
+            // Get only the customers associated with the logged-in user
+            var customers = await _context.Customers
+                                          .Where(c => c.CredentialId == user.Id)
+                                          .ToListAsync();
+
+            return View(customers);
+        }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string searchString)
+        public async Task<IActionResult> Index(string searchString, int pageNumber = 1, int pageSize = 10)
         {
-            var customers = from c in _context.Customers
+            //int countOfBranches = 1;
+
+            var customersQuery = from c in _context.Customers
                             select c;
             if (!String.IsNullOrEmpty(searchString))
             {
-                customers = customers.Where(s => s.Name.Contains(searchString)
+                customersQuery = customersQuery.Where(s => s.Name.Contains(searchString)
                                                  || s.TaxId.Contains(searchString)
                                                  || s.CountOfBranches.Contains(searchString)
                                                  || s.Month.Contains(searchString)
                                                  || s.Year.Contains(searchString));
             }
-            return View(await customers.ToListAsync());
+            int totalRecords = await customersQuery.CountAsync();
+            var customers = await customersQuery
+                                  .Skip((pageNumber - 1) * pageSize)
+                                  .Take(pageSize)
+                                  .ToListAsync();
+
+            var paginatedList = new PaginatedList<Customer>(customers, totalRecords, pageNumber, pageSize);
+
+            return View(paginatedList);
+            //return View(await customers.ToListAsync());
         }
 
         [HttpGet]
@@ -452,7 +478,7 @@ namespace CyrusCustomer.Controllers
                             item.DbCustomer.Name = item.ExcelData.CustomerName;
                             item.DbCustomer.Phone = item.ExcelData.Phone;
                             item.DbCustomer.ResponsiblePerson = item.ExcelData.ResponsiblePerson;
-                            item.DbCustomer.UserUpdated = item.ExcelData.UserUpdated;
+                            item.DbCustomer.UserUpdated = item.ExcelData.UserUpdated ?? "DefaultUser"; // Set a default value if null
                             item.DbCustomer.UpdateDate = item.ExcelData.UpdateDate;
 
                             // Add new branch if not exists
@@ -465,6 +491,22 @@ namespace CyrusCustomer.Controllers
                         }
                         else
                         {
+                            // Initialize long variables for the properties that need conversion
+                            long contractorPhoneNumber = 0;
+                            long internalAccountant = 0;
+                            long internalAccountantPhone = 0;
+                            long charteredAccountant = 0;
+                            long charteredAccountantPhone = 0;
+                            //int countOfBranches = /*1*/; // Assuming this is an integer that needs parsing
+
+                            // Try parsing each property from ExcelData
+                            long.TryParse(item.ExcelData.ContractorPhoneNumber, out contractorPhoneNumber);
+                            long.TryParse(item.ExcelData.InternalAccountant, out internalAccountant);
+                            long.TryParse(item.ExcelData.InternalAccountantPhone, out internalAccountantPhone);
+                            long.TryParse(item.ExcelData.CharteredAccountant, out charteredAccountant);
+                            long.TryParse(item.ExcelData.CharteredAccountantPhone, out charteredAccountantPhone);
+                            //int.TryParse(item.ExcelData.CountOfBranches, out countOfBranches);
+
                             // New customer
                             var newCustomer = new Customer
                             {
@@ -473,18 +515,19 @@ namespace CyrusCustomer.Controllers
                                 Phone = item.ExcelData.Phone,
                                 Year = item.ExcelData.Year,
                                 Month = item.ExcelData.Month,
-                                CountOfBranches = item.ExcelData.CountOfBranches,
+                                CountOfBranches = item.ExcelData.CountOfBranches, // Convert back to string to match Customer class property
                                 ResponsiblePerson = item.ExcelData.ResponsiblePerson,
                                 Contractor = item.ExcelData.Contractor,
-                                ContractorPhoneNumber = item.ExcelData.ContractorPhoneNumber,
-                                InternalAccountant = item.ExcelData.InternalAccountant,
-                                InternalAccountantPhone = item.ExcelData.InternalAccountantPhone,
-                                CharteredAccountant = item.ExcelData.CharteredAccountant,
-                                CharteredAccountantPhone = item.ExcelData.CharteredAccountantPhone,
+                                ContractorPhoneNumber = contractorPhoneNumber, // Convert back to string
+                                InternalAccountant = internalAccountant.ToString(), // Convert back to string
+                                InternalAccountantPhone = internalAccountantPhone, // Convert back to string
+                                CharteredAccountant = charteredAccountant.ToString(), // Convert back to string
+                                CharteredAccountantPhone = charteredAccountantPhone, // Convert back to string
+                                UserUpdated = item.ExcelData.UserUpdated ?? "DefaultUser", // Set a default value if null
                                 Branches = new List<Branch>
-            {
-                new Branch { BranchName = item.ExcelData.BranchName }
-            }
+    {
+        new Branch { BranchName = item.ExcelData.BranchName }
+    }
                             };
 
                             _context.Customers.Add(newCustomer);

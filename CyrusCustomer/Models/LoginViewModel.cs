@@ -5,6 +5,8 @@ namespace CyrusCustomer.Models
     public class LoginViewModel
     {
         [Required]
+        public string Name { get; set; }
+        [Required]
         public string Email { get; set; }
 
         [Required]

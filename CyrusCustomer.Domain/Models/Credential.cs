@@ -12,7 +12,7 @@ namespace CyrusCustomer.Domain.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public int CustomerId { get; set; }
-        [ForeignKey("CustomerId")]
+    
         public virtual Customer Customer { get; set; }
 
     }
