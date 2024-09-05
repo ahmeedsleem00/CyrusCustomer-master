@@ -24,17 +24,20 @@ namespace CyrusCustomer.Controllers
         #region Index and Upload and ViewBranches
         public async Task<IActionResult> Index()
         {
-            // Get the current logged-in user's email
-            var userEmail = User.Identity.Name;
+            //// Get the current logged-in user's email
+            //var userEmail = User.Identity.Name;
 
-            // Retrieve the corresponding credential/user from the database
-            var user = await _context.Credentials.FirstOrDefaultAsync(c => c.Email == userEmail);
+            var customers=  await _context.Customers.ToListAsync();
 
-            // Get only the customers associated with the logged-in user
-            var customers = await _context.Customers
-                                          .Where(c => c.CredentialId == user.Id)
-                                          .ToListAsync();
+            //// Retrieve the corresponding credential/user from the database
+            //var user = await _context.Credentials.FirstOrDefaultAsync(c => c.Email == userEmail);
 
+            //// Get only the customers associated with the logged-in user
+            //var customers = await _context.Customers
+            //                              .Where(c => c.CredentialId == user.Id)
+            //                              .ToListAsync();
+
+            //return View(customers);
             return View(customers);
         }
 
