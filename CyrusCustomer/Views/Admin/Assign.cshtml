@@ -1,0 +1,26 @@
+﻿@model AssignViewModel
+
+<h2>Assign Customers to User</h2>
+
+<form asp-action="AssignCustomers" method="post">
+    <div class="form-group">
+        <label for="users">Select User:</label>
+        <select asp-for="SelectedUserId" asp-items="Model.Users" class="form-control"></select>
+    </div>
+
+    <div class="form-group">
+        <label>Select Customers:</label>
+        <div>
+            @foreach (var customer in Model.PaginatedCustomers)
+            {
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="SelectedCustomerIds" value="@customer.Id" /> @customer.Name
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Assign</button>
+</form>

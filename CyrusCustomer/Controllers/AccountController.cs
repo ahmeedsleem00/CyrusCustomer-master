@@ -1,4 +1,5 @@
 ﻿using CyrusCustomer.DAL;
+using CyrusCustomer.Domain;
 using CyrusCustomer.Domain.Models;
 using CyrusCustomer.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -26,11 +27,11 @@ namespace CyrusCustomer.Controllers
             this._userManager = userManager;
         }
 
-        [HttpGet]
+            [HttpGet]
         [Authorize]
-        //[Authorize(Roles = "Admin")]
-        public IActionResult Register()
-        {
+            //[Authorize(Roles = "Admin")]
+            public IActionResult Register()
+            {
             var user = User.Identity.Name;
             if (user != "admin@Cyrus.com")
             {
@@ -38,12 +39,13 @@ namespace CyrusCustomer.Controllers
             }
 
             return View();
-        }
+            }
 
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Register(RegisterViewModel model)
-        {
+            [HttpPost]
+        //[Authorize(Roles = "Admin")]
+        [Authorize]
+            public async Task<IActionResult> Register(RegisterViewModel model)
+            {
             if (ModelState.IsValid)
             {
                 //var user = new IdentityUser { UserName = model.Email, Email = model.Email };
@@ -58,30 +60,71 @@ namespace CyrusCustomer.Controllers
                 //}
                 //foreach (var error in result.Errors) { ModelState.AddModelError(string.Empty, error.Description); }
 
-                var user = User.Identity.Name;
-                if (user != "admin@Cyrus.com")
-                {
-                    return Unauthorized(); // or RedirectToAction("AccessDenied", "Account");
-                }
+                //var user = User.Identity.Name;
+                //if (user != "admin@Cyrus.com")
+                //{
+                //    return Unauthorized(); // or RedirectToAction("AccessDenied", "Account");
+                //}
 
                 // Logic to create a new user
                 // Example:
-                var credential = new Credential
+                //var credential = new Credential
+                //{
+                //    Email = model.Email,
+                //    Password = model.Password, // Make sure to hash this
+                //    Name = model.Name,
+                //    //CustomerId = model.CustomerId // This should be set accordingly
+                //};
+
+                //_context.Credentials.Add(credential);
+                //await _context.SaveChangesAsync();
+
+                //return RedirectToAction("Index", "Home");
+
+                if (ModelState.IsValid)
                 {
-                    Email = model.Email,
-                    Password = model.Password, // Make sure to hash this
-                    Name = model.Name,
-                    //CustomerId = model.CustomerId // This should be set accordingly
-                };
+                    // Check if a user with the same email already exists
+                    var existingUser = await _userManager.FindByEmailAsync(model.Email);
+                    if (existingUser != null)
+                    {
+                        ModelState.AddModelError(string.Empty, "A user with this email already exists.");
+                        return View(model);
+                    }
 
-                _context.Credentials.Add(credential);
-                await _context.SaveChangesAsync();
+                    // Create a new IdentityUser (or your custom ApplicationUser class)
+                    var user = new ApplicationUser
+                    {
+                        UserName = model.Email,
+                        Email = model.Email,
+                        PasswordHash = model.Password
+                        // Add any additional fields from your model if necessary (e.g., Name)
+                    };
 
-                return RedirectToAction("Index", "Home");
+                    // Hash the password and create the user in Identity
+                    var result = await _userManager.CreateAsync(user, model.Password);
+
+                    if (result.Succeeded)
+                    {
+                        //// Optionally, assign a role to the user (e.g., 'User')
+                        //await _userManager.AddToRoleAsync(user, "User");
+
+                        // Redirect the admin to a relevant page (e.g., customer list)
+                        return RedirectToAction("Index", "Customer");
+                    }
+                    else
+                    {
+                        // Add errors to the model state to display in the view
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                    }
+                }
             }
-            return View(model);
+            return RedirectToAction("Index", "Home");
+            //return View(model);
 
-        }
+            }
         
         [HttpGet]
         public IActionResult Login()
@@ -94,28 +137,23 @@ namespace CyrusCustomer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (ModelState.IsValid)
+            if (model == null || string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                ModelState.AddModelError(string.Empty, "Email and Password are required.");
+                return View(model); // Return the same view with an error message
+            }   
 
-                if (result.Succeeded)
-                {
-                    return RedirectToAction("Index", "Customer");
-                }
-                else if (result.IsLockedOut)
-                {
-                    ModelState.AddModelError(string.Empty, "Your account is locked out.");
-                }
-                else if (result.IsNotAllowed)
-                {
-                    ModelState.AddModelError(string.Empty, "Your account is not allowed to sign in.");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                }
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Index", "Customer");
             }
-            return View(model);
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return View(model);
+            }
         }
 
         [HttpPost]
@@ -174,5 +212,8 @@ namespace CyrusCustomer.Controllers
             }
 
         }
+
+
+
     }
 }

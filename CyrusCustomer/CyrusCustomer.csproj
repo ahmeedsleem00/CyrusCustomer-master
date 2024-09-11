@@ -17,11 +17,19 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.17" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CyrusCustomer.DAL\CyrusCustomer.DAL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\Customer\Assign.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

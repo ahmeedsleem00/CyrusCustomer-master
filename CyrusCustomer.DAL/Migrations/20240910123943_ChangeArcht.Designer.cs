@@ -4,6 +4,7 @@ using CyrusCustomer.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CyrusCustomer.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240910123943_ChangeArcht")]
+    partial class ChangeArcht
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,7 +58,7 @@ namespace CyrusCustomer.DAL.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Branches", (string)null);
+                    b.ToTable("Branches");
                 });
 
             modelBuilder.Entity("CyrusCustomer.Domain.Models.Credential", b =>
@@ -85,7 +87,7 @@ namespace CyrusCustomer.DAL.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Credentials", (string)null);
+                    b.ToTable("Credentials");
                 });
 
             modelBuilder.Entity("CyrusCustomer.Domain.Models.Customer", b =>
@@ -163,7 +165,7 @@ namespace CyrusCustomer.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("CyrusCustomer.Domain.Models.CustomerUserAssignment", b =>
@@ -186,7 +188,7 @@ namespace CyrusCustomer.DAL.Migrations
                     b.HasIndex("CustomerId")
                         .IsUnique();
 
-                    b.ToTable("CustomerUserAssignments", (string)null);
+                    b.ToTable("CustomerUserAssignments");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

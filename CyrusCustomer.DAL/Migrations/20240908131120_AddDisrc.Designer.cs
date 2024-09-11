@@ -4,6 +4,7 @@ using CyrusCustomer.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CyrusCustomer.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240908131120_AddDisrc")]
+    partial class AddDisrc
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,7 +58,7 @@ namespace CyrusCustomer.DAL.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Branches", (string)null);
+                    b.ToTable("Branches");
                 });
 
             modelBuilder.Entity("CyrusCustomer.Domain.Models.Credential", b =>
@@ -85,7 +87,73 @@ namespace CyrusCustomer.DAL.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Credentials", (string)null);
+                    b.ToTable("Credentials");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CustomerId = 0,
+                            Email = "admin@Cyrus.com",
+                            Name = "Admin",
+                            Password = "Cyrus@2024"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CustomerId = 0,
+                            Email = "tony@Cyrus.com",
+                            Name = "Tony",
+                            Password = "Cyrus@2024"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CustomerId = 0,
+                            Email = "mahmoud@Cyrus.com",
+                            Name = "Mahmoud",
+                            Password = "Cyrus@2024"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CustomerId = 0,
+                            Email = "mina@Cyrus.com",
+                            Name = "Mina",
+                            Password = "Cyrus@2024"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CustomerId = 0,
+                            Email = "mohamad@Cyrus.com",
+                            Name = "Mohamad",
+                            Password = "Cyrus@2024"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CustomerId = 0,
+                            Email = "amr@Cyrus.com",
+                            Name = "Amro",
+                            Password = "Cyrus@2024"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CustomerId = 0,
+                            Email = "youssef@Cyrus.com",
+                            Name = "Youssef",
+                            Password = "Cyrus@2024"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CustomerId = 0,
+                            Email = "sameh@Cyrus.com",
+                            Name = "Sameh",
+                            Password = "Cyrus@2024"
+                        });
                 });
 
             modelBuilder.Entity("CyrusCustomer.Domain.Models.Customer", b =>
@@ -163,30 +231,7 @@ namespace CyrusCustomer.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customers", (string)null);
-                });
-
-            modelBuilder.Entity("CyrusCustomer.Domain.Models.CustomerUserAssignment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId")
-                        .IsUnique();
-
-                    b.ToTable("CustomerUserAssignments", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -409,17 +454,6 @@ namespace CyrusCustomer.DAL.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("CyrusCustomer.Domain.Models.CustomerUserAssignment", b =>
-                {
-                    b.HasOne("CyrusCustomer.Domain.Models.Customer", "Customer")
-                        .WithOne("Users")
-                        .HasForeignKey("CyrusCustomer.Domain.Models.CustomerUserAssignment", "CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -476,9 +510,6 @@ namespace CyrusCustomer.DAL.Migrations
                     b.Navigation("Branches");
 
                     b.Navigation("Credentials");
-
-                    b.Navigation("Users")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

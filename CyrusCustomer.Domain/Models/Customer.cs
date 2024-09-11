@@ -37,10 +37,10 @@ namespace CyrusCustomer.Domain.Models
         public bool UpdateConfirmed { get; set; }
         public DateTime UpdateDate { get; set; } = DateTime.Today;
         public string? Notes { get; set; }
-        // Foreign key to the Credential (User)
-        //public int CredentialId { get; set; }
-        //[ForeignKey("CredentialId")]
-        //public Credential Credential { get; set; }
+        //public ICollection<CustomerUserAssignment> UserCustomers { get; set; }
+        public CustomerUserAssignment Users { get; set; }
+
+
         public virtual ICollection<Credential>? Credentials { get; set; }
         public virtual ICollection<Branch>? Branches { get; set; }
     }

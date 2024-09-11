@@ -39,6 +39,7 @@ namespace CyrusCustomer.Spreadsheet
                     existingCustomer.CharteredAccountant = customer.CharteredAccountant;
                     existingCustomer.CharteredAccountantPhone = customer.CharteredAccountantPhone;
                     existingCustomer.Status = customer.Status;
+                    existingCustomer.Users = customer.Users;
 
                 }
                 else

@@ -53,7 +53,8 @@ namespace CyrusCustomer.Spreadsheet
                         CharteredAccountantPhone = charteredAccountantPhone,
                         Status = status,
                         UpdateDate = DateTime.Parse(worksheet.Cells[row, 15].Text), // Assuming this is the correct column for UpdateDate
-                        Notes = worksheet.Cells[row, 16].Text  // Assuming this is the correct column for Notes
+                        Notes = worksheet.Cells[row, 16].Text, // Assuming this is the correct column for Notes
+                        //User = worksheet.Cells[row, 17].Text
                     };
                     customers.Add(customer);
                 }
