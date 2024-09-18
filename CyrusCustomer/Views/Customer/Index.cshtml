@@ -23,16 +23,16 @@
 </p>
 }
 
-<!-- Form to Assign Customers to User -->
-<form asp-action="AssignCustomers" method="post">
-
-    
+@using (Html.BeginForm("Index", "Customer", FormMethod.Get))
+{
     <div class="form-group">
         <input type="text" name="searchString" class="form-control" placeholder="Search by Customer Name, Tax ID, Year, Month" value="@Model.SearchString" />
     </div>
-
     <button type="submit" class="btn btn-primary">Search</button>
-</form>
+}
+
+
+
 
 <!-- Customer List with Checkboxes -->
 <form asp-action="AssignCustomers" method="post">
@@ -44,7 +44,10 @@
                 <th>سجل ضريبي</th>
                 <th>إسم الشركه</th>
                 <th>عدد الفروع</th>
-                <th></th>
+                <th>Updated</th>
+
+                <th>Select Cst.</th>
+                <th>Assigned Users</th>
             </tr>
         </thead>
 
@@ -58,19 +61,37 @@
                     <td>@item.Name</td>
                     <td>@item.CountOfBranches</td>
                     <td>
-                        <div class="d-inline">
+                        <input type="checkbox" class="form-check-input me-2" disabled @(item.IsUpdated ? "checked" : "") />
+                    </td>
+                 
+                    <td>
+                        <div class="d-flex align-items-center">
                             @if (User.Identity.Name == "admin@Cyrus.com")
 
                             {
-                                <input type="checkbox" name="SelectedCustomerIds" value="@item.Id" />
-                                <a asp-action="Edit" class="btn btn-success btn-sm mx-1" asp-route-id="@item.Id">Edit</a>
-                                <a asp-action="Delete" class="btn btn-danger btn-sm mx-1">Delete</a>
+
+                                <input type="checkbox" name="SelectedCustomerIds" class="form-check-input me-2" value="@item.Id" />
+                                <a asp-action="Edit" class="btn btn-success btn-sm me-2" asp-route-id="@item.Id">Edit</a>
 
                             }
-                           
-                            <a asp-action="Details" class="btn btn-warning btn-sm mx-1" asp-route-id="@item.Id">Details</a>
-                            <a asp-action="ViewBranches" asp-route-customerId="@item.Id" class="btn btn-dark btn-sm ms-auto mt-1">View Branches</a>
+
+                            <a asp-action="Details" class="btn btn-dark btn-sm" asp-route-id="@item.Id">Details</a>
                         </div>
+                    </td>
+                    <td>
+                        @if (Model.CustomerAssignments.ContainsKey(item.Id))
+                        {
+                            <ul>
+                                @foreach (var userId in Model.CustomerAssignments[item.Id])
+                                {
+                                    <li>@Model.Users.FirstOrDefault(u => u.Value == userId)?.Text</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No users assigned</p>
+                        }
                     </td>
                 </tr>
             }

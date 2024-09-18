@@ -1,12 +1,14 @@
 ﻿using CyrusCustomer.DAL;
 using CyrusCustomer.Domain.Models;
 using OfficeOpenXml;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CyrusCustomer.Spreadsheet
 {
     public class ExcelReader
     {
-
         public static List<Customer> ReadExcelFile(string filepath)
         {
             var customers = new List<Customer>();
@@ -30,11 +32,22 @@ namespace CyrusCustomer.Spreadsheet
                     long charteredAccountantPhone = 0;
                     long.TryParse(worksheet.Cells[row, 13].Text, out charteredAccountantPhone);
 
-                    bool status = false;
-                    bool.TryParse(worksheet.Cells[row, 14].Text, out status);
+                    // parsing status as a string and converting it to enum
+                    string statusText = worksheet.Cells[row, 14].Text.Trim();
+                    CustomerStatus statusEnum = ConvertStringToStatus(statusText);
 
-                    //int countOfBranches = 1; // Default to 1
-                    //int.TryParse(worksheet.Cells[row, 5].Text, out countOfBranches);
+                    // Parsing decimal values
+                    decimal amount1 = 0;
+                    decimal.TryParse(worksheet.Cells[row, 17].Text, out amount1); // Assuming column 17 for Amount1
+
+                    decimal amount2 = 0;
+                    decimal.TryParse(worksheet.Cells[row, 18].Text, out amount2); // Assuming column 18 for Amount2
+
+                    decimal amount3 = 0;
+                    decimal.TryParse(worksheet.Cells[row, 19].Text, out amount3); // Assuming column 19 for Amount3
+
+                    bool collected = false;
+                    bool.TryParse(worksheet.Cells[row, 20].Text, out collected); // Assuming column 20 for Collected
 
                     var customer = new Customer
                     {
@@ -51,10 +64,13 @@ namespace CyrusCustomer.Spreadsheet
                         InternalAccountantPhone = internalAccountantPhone,
                         CharteredAccountant = worksheet.Cells[row, 12].Text,
                         CharteredAccountantPhone = charteredAccountantPhone,
-                        Status = status,
+                        Status = statusEnum,
+                        Amount1 = amount1,
+                        Amount2 = amount2,
+                        Amount3 = amount3,
+                        Collected = collected,
                         UpdateDate = DateTime.Parse(worksheet.Cells[row, 15].Text), // Assuming this is the correct column for UpdateDate
                         Notes = worksheet.Cells[row, 16].Text, // Assuming this is the correct column for Notes
-                        //User = worksheet.Cells[row, 17].Text
                     };
                     customers.Add(customer);
                 }
@@ -62,6 +78,16 @@ namespace CyrusCustomer.Spreadsheet
             return customers;
         }
 
-
+        private static CustomerStatus ConvertStringToStatus(string statusText)
+        {
+            return statusText switch
+            {
+                "Yes" => CustomerStatus.Yes,
+                "No" => CustomerStatus.No,
+                "Pending" => CustomerStatus.Pending,
+                "N/A" => CustomerStatus.NA,
+                "Non" => CustomerStatus.Non,
+            };
+        }
     }
 }

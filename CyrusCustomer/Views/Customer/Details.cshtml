@@ -11,56 +11,135 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            CountOfBranches
+            Year
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Year
+        </dd>
+        <dt class="col-sm-2">
+            Month
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Month
+        </dd>
+        <dt class="col-sm-2">
+            عدد الفروع
         </dt>
         <dd class="col-sm-10">
             @Model.CountOfBranches
         </dd>
         <dt class="col-sm-2">
-            Name
+            اسم العميل
         </dt>
         <dd class="col-sm-10">
             @Model.Name
         </dd>
         <dt class="col-sm-2">
-            Phone
+            رقم التليفون
+
         </dt>
         <dd class="col-sm-10">
             @Model.Phone
         </dd>
         <dt class="col-sm-2">
-            Version Updated
+            سجل ضريبي
+        </dt>
+        <dd class="col-sm-10">
+            @Model.TaxId
+        </dd>
+        <dt class="col-sm-2">
+            اسم المسؤل
         </dt>
         <dd class="col-sm-10">
             @Model.ResponsiblePerson
         </dd>
-        <dt class="col-sm-2">
+      @*   <dt class="col-sm-2">
             User Updated
         </dt>
         <dd class="col-sm-10">
             @Model.UserUpdated
-        </dd>
-        <dt class="col-sm-2">
-            Contractor
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Contractor
-        </dd>
+        </dd> *@
         <dt class="col-sm-2">
             Update Date
         </dt>
         <dd class="col-sm-10">
             @Model.UpdateDate
         </dd>
-        <dt class="col-sm-2">
+      @*   <dt class="col-sm-2">
             Notes
         </dt>
         <dd class="col-sm-10">
             @Model.Notes
+        </dd> *@
+        <dt class="col-sm-2">
+            المتعاقد
+
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Contractor
+        </dd>
+        <dt class="col-sm-2">
+            رقم تليفون المتعاقد
+        </dt>
+        <dd class="col-sm-10">
+            @Model.ContractorPhoneNumber
+        </dd>
+        <dt class="col-sm-2">
+            محاسب داخلى
+        </dt>
+        <dd class="col-sm-10">
+            @Model.InternalAccountant
+        </dd>
+        <dt class="col-sm-2">
+            ت. محاسب داخلى
+        </dt>
+        <dd class="col-sm-10">
+            @Model.InternalAccountantPhone
+        </dd>
+        <dt class="col-sm-2">
+            المحاسب القانوني
+        </dt>
+        <dd class="col-sm-10">
+            @Model.CharteredAccountant
+        </dd>
+        <dt class="col-sm-2">
+            ت. المحاسب القانوني
+        </dt>
+        <dd class="col-sm-10">
+            @Model.CharteredAccountantPhone
         </dd>
     </dl>
 </div>
+<!-- Form to Update Comments and IsUpdated -->
+<form asp-action="SaveCommentAndUpdate" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <div class="form-group">
+        <label asp-for="Comments" class="control-label">Comments</label>
+        <textarea asp-for="Comments" class="form-control"></textarea>
+    </div>
+    <div class="form-group form-check">
+        <input asp-for="IsUpdated" class="form-check-input" type="checkbox" />
+        <label asp-for="IsUpdated" class="form-check-label">Updated</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}

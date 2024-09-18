@@ -54,37 +54,6 @@ namespace CyrusCustomer.Controllers
             }
 
 
-            //  var customers =  await _context.Customers.ToListAsync();
-            //// Retrieve the corresponding credential/user from the database
-            //var user = await _context.Credentials.FirstOrDefaultAsync(c => c.Email == userEmail);
-
-            //// Get only the customers associated with the logged-in user
-            //var customers = await _context.Customers
-            //                              .Where(c => c.CredentialId == user.Id)
-            //                              .ToListAsync();
-            //    var viewModel = new CustomerListViewModel
-            //    {
-            //        Customers = customers,
-            //        Users = users,
-            //        CustomerUserAssignments = customers.ToDictionary(
-            //    customer => customer.Id,
-            //    customer => _context.CustomerUserAssignments
-            //                    .Where(cua => cua.CustomerId == customer.Id)
-            //                    .Select(cua => cua.UserId)
-            //                    .ToList()
-            //)
-            //    };
-            // return View(customers);
-            //return View(viewModel);
-
-            //var userId = _userManager.GetUserId(User);
-
-            //var assignedCustomers = await _context.CustomerUserAssignments
-            //    .Where(uc => uc.UserId == userId)
-            //    .Select(uc => uc.Customer)
-            //    .ToListAsync();
-
-            //return View(assignedCustomers);
         }
 
         [HttpGet]
@@ -95,13 +64,7 @@ namespace CyrusCustomer.Controllers
 
             var customersQuery = _context.Customers.AsQueryable();
 
-            //var users = await _userManager.Users
-            //.Select(u => new SelectListItem
-            //{
-            //    Value = u.Id,
-            //    Text = u.UserName
-            //}).ToListAsync();
-            //var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+          
 
             if (!isAdmin)
             {
@@ -111,31 +74,63 @@ namespace CyrusCustomer.Controllers
 
                 customersQuery = customersQuery.Where(c => assignedCustomerIds.Contains(c.Id));
             }
-            // Filter customers based on the selected user if not admin
-            // Filter by selected user if not admin
-            //if (!User.IsInRole("Admin") && !string.IsNullOrEmpty(selectedUserId))
-            //{
-            //    customersQuery = from c in _context.Customers
-            //                     join uc in _context.CustomerUserAssignments on c.Id equals uc.CustomerId
-            //                     where uc.UserId == selectedUserId
-            //                     select c;
-            //}
+           
             if (!String.IsNullOrEmpty(searchString))
             {
-                customersQuery = customersQuery.Where(s => s.Name.Contains(searchString)
-                                                 || s.TaxId.Contains(searchString)
-                                                 || s.CountOfBranches.Contains(searchString)
-                                                 || s.Month.Contains(searchString)
-                                                 || s.Year.Contains(searchString));
+                customersQuery = customersQuery.Where(s => s.Name.Contains(searchString.Trim())
+                                                 || s.TaxId.Contains(searchString.Trim())
+                                                 || s.CountOfBranches.Contains(searchString.Trim())
+                                                 || s.Month.Contains(searchString.Trim())
+                                                 || s.Year.Contains(searchString.Trim()));
             }
+
+            // Check the types of properties here
+            var customerQuery = customersQuery.Select(c => new
+            {
+                c.Id,
+                c.Name,
+                c.TaxId,
+                c.CountOfBranches,
+                c.Month,
+                c.Year,
+                c.Status,
+                c.Contractor,
+                c.ContractorPhoneNumber,
+                c.InternalAccountant,
+                c.InternalAccountantPhone,
+                c.CharteredAccountant,
+                c.CharteredAccountantPhone,
+                // Add other properties as needed
+            });
+
             int totalRecords = await customersQuery.CountAsync();
+
             var customers = await customersQuery
                                   .Skip((pageNumber - 1) * pageSize)
                                   .Take(pageSize)
                                   .ToListAsync();
 
-            var paginatedList = new PaginatedList<Customer>(customers, totalRecords, pageNumber, pageSize);
+            // Fetch all customer-user assignments
+            var customerAssignments = await _context.CustomerUserAssignments
+                .Where(cua => customers.Select(c => c.Id).Contains(cua.CustomerId))
+                .ToListAsync();
 
+            // Build the dictionary mapping customer IDs to lists of user IDs
+            var customerAssignmentsDict = customerAssignments
+                .GroupBy(cua => cua.CustomerId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(cua => cua.UserId).ToList()
+                );
+
+            // Debugging: Log the contents of customerAssignmentsDict
+            Console.WriteLine("CustomerAssignmentsDict:");
+            foreach (var kvp in customerAssignmentsDict)
+            {
+                Console.WriteLine($"CustomerId: {kvp.Key}, UserIds: {string.Join(", ", kvp.Value)}");
+            }
+
+        //    var paginatedList = new PaginatedList<Customer>(customers, totalRecords, pageNumber, pageSize);
 
             IEnumerable<SelectListItem> users = new List<SelectListItem>();
             if (isAdmin)
@@ -150,43 +145,13 @@ namespace CyrusCustomer.Controllers
             var viewModel = new AssignViewModel
             {
                 Users = users,
-                PaginatedCustomers = paginatedList
+                PaginatedCustomers = new PaginatedList<Customer>(customers, totalRecords, pageNumber, pageSize),
+                CustomerAssignments = customerAssignmentsDict
+
             };
 
             return View(viewModel);
-            //ViewBag.IsAdmin = isAdmin;
-            //return View(paginatedList);
-
-
-
-
-            //==================== Another Logic ======================
-            // Execute raw SQL query to get users
-
-
-            //var users = await _userManager.Users.ToListAsync();
-
-            //var customersQuery = _context.Customers.AsQueryable();
-
-            //if (!string.IsNullOrEmpty(searchString))
-            //{
-            //    customersQuery = customersQuery.Where(c => c.Name.Contains(searchString) ||
-            //                                               c.TaxId.Contains(searchString));
-            //}
-
-            //int totalRecords = await customersQuery.CountAsync();
-            //var customers = await customersQuery
-            //                            .Skip((pageNumber - 1) * pageSize)
-            //                            .Take(pageSize)
-            //                            .ToListAsync();
-
-            //var viewModel = new CustomerListViewModel
-            //{
-            //    Customers = new PaginatedList<Customer>(customers, totalRecords, pageNumber, pageSize),
-            //    Users = users
-            //};
-
-            //return View(viewModel);
+         
 
         }
 
@@ -223,11 +188,22 @@ namespace CyrusCustomer.Controllers
         #endregion
 
         #region Assign Methods
-        //public IActionResult AssignCustomers()
+
+        //[HttpPost]
+        //public IActionResult AssignCustomers(AssignViewModel model)
         //{
-        //    ViewData["Users"] = new SelectList(_context.Users, "Id", "UserName");
-        //    ViewData["Customers"] = new MultiSelectList(_context.Customers, "Id", "Name");
-        //    return View();
+        //    // Logic to assign customers to the selected user
+        //    if (model.SelectedUserId != null && model.PaginatedCustomers != null)
+        //    {
+        //        // Perform the customer assignment logic
+        //        TempData["SuccessMessage"] = "Customers assigned successfully!";
+        //    }
+        //    else
+        //    {
+        //        TempData["ErrorMessage"] = "Please select both user and customers to assign.";
+        //    }
+
+        //    return RedirectToAction("Index");
         //}
 
 
@@ -277,6 +253,37 @@ namespace CyrusCustomer.Controllers
             return View(customer);
 
         }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveCommentAndUpdate(CommentAndUpdateViewModel model)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                // Handle invalid model state
+                return RedirectToAction("Details", new { id = model.Id });
+            }
+
+            // Debugging: Check if model values are correctly received
+
+            var customer = await _context.Customers.FindAsync(model.Id);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            // Update the customer's properties
+            customer.Comments = model.Comments;
+            customer.IsUpdated = model.IsUpdated;
+
+            // Save changes to the database
+            _context.Update(customer);
+            await _context.SaveChangesAsync();
+
+            // Redirect back to the Details page
+            return RedirectToAction("Details", new { id = model.Id });
+        }
+
         #endregion
 
         #region Create
@@ -540,13 +547,7 @@ namespace CyrusCustomer.Controllers
 
         #region Excel Sheet Methods
 
-        //public IActionResult DownloadBranchesFileExcel()
-        //{
-        //    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/spreedsheet/Update_Sheet.xlsx");
-
-        //    var fileBytes = System.IO.File.ReadAllBytes(filePath);
-        //    return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreedsheet.sheet", "Update_Sheet.xlsx");
-        //}
+    
         private async Task UpdateCustomersFromExcel(IFormFile file)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -574,7 +575,8 @@ namespace CyrusCustomer.Controllers
                     // Use a dictionary to group branch names by customer
                     var customerBranches = new Dictionary<string, List<string>>();
                     var customerData = new List<(string Year, string Month, string CountOfBranches, string CustomerName, string TaxId, string BranchName, string ResponsiblePerson, string Phone, string UserUpdated, DateTime UpdateDate,
-                        string Status, string Contractor, string ContractorPhoneNumber, string InternalAccountant, string InternalAccountantPhone, string CharteredAccountant, string CharteredAccountantPhone,string User)>();
+                            decimal Amount1, decimal Amount2, decimal Amount3, bool Collected
+                        , string Contractor, string ContractorPhoneNumber, string InternalAccountant, string InternalAccountantPhone, string CharteredAccountant, string CharteredAccountantPhone,string User)>();
 
                     for (int row = 2; row <= rowCount; row++)
                     {
@@ -597,14 +599,29 @@ namespace CyrusCustomer.Controllers
                         var userUpdated = worksheet.Cells[row, 9].Text.Trim();
                         var updateDateCell = worksheet.Cells[row, 10].Text.Trim();
                         var users = worksheet.Cells[row, 18].Text.Trim(); // Users column should be in column 18
-    
+
+                        // Parse new properties
+                        decimal amount1 = 0;
+                        decimal.TryParse(worksheet.Cells[row, 18].Text.Trim(), out amount1); // Assuming column 18 for Amount1
+
+                        decimal amount2 = 0;
+                        decimal.TryParse(worksheet.Cells[row, 19].Text.Trim(), out amount2); // Assuming column 19 for Amount2
+
+                        decimal amount3 = 0;
+                        decimal.TryParse(worksheet.Cells[row, 20].Text.Trim(), out amount3); // Assuming column 20 for Amount3
+
+                        bool collected = false;
+                        bool.TryParse(worksheet.Cells[row, 21].Text.Trim(), out collected); // Assuming column 21 for Collected
+
                         DateTime.TryParse(updateDateCell, out DateTime updateDate);
 
+
                         customerData.Add((year, month, countOfBranches, customerName,
-                            taxId, branchName, responsiblePerson, phone,
-                            userUpdated, updateDate, status, contractor, contractorPhoneNumber,
-                            internalAccountant, internalAccountantPhone, charteredAccountant,
-                            charteredAccountantPhone,users));
+                       taxId, branchName, responsiblePerson, phone,
+                       userUpdated, updateDate, amount1, amount2, amount3, collected,
+                       contractor, contractorPhoneNumber,
+                       internalAccountant, internalAccountantPhone,
+                       charteredAccountant, charteredAccountantPhone, "DefaultUser"));
 
                         // Group branches by customer
                         if (!customerBranches.ContainsKey(customerName))
@@ -647,7 +664,11 @@ namespace CyrusCustomer.Controllers
                             item.DbCustomer.ResponsiblePerson = item.ExcelData.ResponsiblePerson;
                             item.DbCustomer.UserUpdated = item.ExcelData.UserUpdated ?? "DefaultUser"; // Set a default value if null
                             item.DbCustomer.UpdateDate = item.ExcelData.UpdateDate;
-                                // Add new branch if not exists
+                            item.DbCustomer.Amount1 = item.ExcelData.Amount1;
+                            item.DbCustomer.Amount2 = item.ExcelData.Amount2;
+                            item.DbCustomer.Amount3 = item.ExcelData.Amount3;
+                            item.DbCustomer.Collected = item.ExcelData.Collected;
+                            // Add new branch if not exists
                             if (item.DbCustomer.Branches.All(b => b.BranchName != item.ExcelData.BranchName))
                             {
                                 item.DbCustomer.Branches.Add(new Branch { BranchName = item.ExcelData.BranchName });
@@ -690,6 +711,10 @@ namespace CyrusCustomer.Controllers
                                 CharteredAccountant = charteredAccountant.ToString(), // Convert back to string
                                 CharteredAccountantPhone = charteredAccountantPhone, // Convert back to string
                                 UserUpdated = item.ExcelData.UserUpdated ?? "DefaultUser", // Set a default value if null
+                                Amount1 = item.ExcelData.Amount1,
+                                Amount2 = item.ExcelData.Amount2,
+                                Amount3 = item.ExcelData.Amount3,
+                                Collected = item.ExcelData.Collected,
                                 Branches = new List<Branch>
                                 {
                                     new Branch { BranchName = item.ExcelData.BranchName }

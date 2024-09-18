@@ -1,0 +1,23 @@
+﻿body {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.navbar {
+    background-color: #000;
+    color: #e0e0e0;
+}
+
+.navbar .navbar-brand, .navbar .navbar-nav .nav-link {
+    color: #e0e0e0;
+}
+
+.table {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #2c2c2c;
+    color: white;
+}
