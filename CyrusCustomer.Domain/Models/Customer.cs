@@ -49,6 +49,7 @@ namespace CyrusCustomer.Domain.Models
         public decimal Amount2 { get; set; }
         public decimal Amount3 { get; set; }
         public bool Collected { get; set; }
+        public string? By { get; set; }
 
     }
 }

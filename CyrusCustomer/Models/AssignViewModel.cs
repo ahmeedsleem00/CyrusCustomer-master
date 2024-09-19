@@ -12,6 +12,7 @@ namespace CyrusCustomer.Models
         public string SearchString { get; set; }
         public PaginatedList<Customer> PaginatedCustomers { get; set; }
         public Dictionary<int, List<string>> CustomerAssignments { get; set; }
+        public Customer? By { get; set; }
 
     }
 }

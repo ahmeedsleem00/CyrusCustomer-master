@@ -69,7 +69,8 @@ namespace CyrusCustomer.Spreadsheet
                         Amount2 = amount2,
                         Amount3 = amount3,
                         Collected = collected,
-                        UpdateDate = DateTime.Parse(worksheet.Cells[row, 15].Text), // Assuming this is the correct column for UpdateDate
+                        By = worksheet.Cells[row, 15].Text,
+                        UpdateDate = DateTime.Parse(worksheet.Cells[row, 21].Text), // Assuming this is the correct column for UpdateDate
                         Notes = worksheet.Cells[row, 16].Text, // Assuming this is the correct column for Notes
                     };
                     customers.Add(customer);

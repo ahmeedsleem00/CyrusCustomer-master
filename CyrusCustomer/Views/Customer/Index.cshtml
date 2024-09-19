@@ -12,6 +12,7 @@
 <p>
     <a asp-action="Create" style="text-decoration: none;" class="btn btn-dark">Create New</a>
     <a asp-action="Upload" class="btn btn-primary" style="margin-left: 10px;">Upload Excel</a>
+     
 
     @using (Html.BeginForm("DeleteAll", "Customer", FormMethod.Post))
     {
@@ -39,15 +40,23 @@
     <table class="table table-striped">
         <thead>
             <tr>
+               
                 <th>تاريخ الفاتورة (السنوي)</th>
                 <th>تارخ الفاتور (الشهر)</th>
                 <th>سجل ضريبي</th>
                 <th>إسم الشركه</th>
                 <th>عدد الفروع</th>
-                <th>Updated</th>
+                    @if (User.Identity.Name == "admin@Cyrus.com")
 
-                <th>Select Cst.</th>
+                            {
+                <th>By</th>
+
+                <th>Status</th>
+                <th>Updated</th>
+                <th>Select <br /> CST.</th>
                 <th>Assigned Users</th>
+                  }
+
             </tr>
         </thead>
 
@@ -55,15 +64,21 @@
             @foreach (var item in Model.PaginatedCustomers)
             {
                 <tr>
+                   
                     <td>@item.Year</td>
                     <td>@item.Month</td>
                     <td>@item.TaxId</td>
                     <td>@item.Name</td>
                     <td>@item.CountOfBranches</td>
+                    @if (User.Identity.Name == "admin@Cyrus.com")
+
+                    {
+                   <td>@item.By</td>
+                   <td>@item.Status</td>
                     <td>
                         <input type="checkbox" class="form-check-input me-2" disabled @(item.IsUpdated ? "checked" : "") />
                     </td>
-                 
+                    }
                     <td>
                         <div class="d-flex align-items-center">
                             @if (User.Identity.Name == "admin@Cyrus.com")
@@ -102,7 +117,7 @@
 
     {
         <!-- Submit button to assign selected customers -->
-        <form asp-action="AssignCustomers" method="post">
+        @* <form asp-action="AssignCustomers" method="post"> *@
             @if (User.Identity.Name == "admin@Cyrus.com")
             {
                 <div class="form-group">
@@ -125,7 +140,7 @@
                 </div>
             }
             <button type="submit" class="btn btn-success mt-3">Assign</button>
-        </form>
+        @* </form> *@
     }
 </form>
 
@@ -163,14 +178,14 @@
     </script>
     }
     <!-- end of Jquery -->
-
-
 <!-- Pagination Controls -->
+
 <nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
+    <ul class="pagination custom-pagination justify-content-center">
         <!-- Previous Page Link -->
         <li class="page-item @(Model.PaginatedCustomers.HasPreviousPage ? "" : "disabled")">
-            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PaginatedCustomers.PageIndex - 1)" aria-label="Previous">
+            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PaginatedCustomers.PageIndex - 1)"
+               asp-route-searchString="@Model.SearchString" asp-route-selectedUserId="@Model.SelectedUserId" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
@@ -181,7 +196,8 @@
             if (i == 1 || i == Model.PaginatedCustomers.TotalPages || (i >= Model.PaginatedCustomers.PageIndex - 2 && i <= Model.PaginatedCustomers.PageIndex + 2))
             {
                 <li class="page-item @(i == Model.PaginatedCustomers.PageIndex ? "active" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
+                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i"
+                       asp-route-searchString="@Model.SearchString" asp-route-selectedUserId="@Model.SelectedUserId">@i</a>
                 </li>
             }
             else if (i == Model.PaginatedCustomers.PageIndex - 3 || i == Model.PaginatedCustomers.PageIndex + 3)
@@ -194,9 +210,60 @@
 
         <!-- Next Page Link -->
         <li class="page-item @(Model.PaginatedCustomers.HasNextPage ? "" : "disabled")">
-            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PaginatedCustomers.PageIndex + 1)" aria-label="Next">
+            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PaginatedCustomers.PageIndex + 1)"
+               asp-route-searchString="@Model.SearchString" asp-route-selectedUserId="@Model.SelectedUserId" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
     </ul>
 </nav>
+
+<style>
+    .custom-pagination .page-item .page-link {
+        background-color: #1f2f3f; /* Custom background color */
+        color: white; /* Text color */
+        border: 1px solid #1f2f3f; /* Border color */
+        margin: 0 5px; /* Space between buttons */
+        border-radius: 5px; /* Rounded corners */
+        transition: all 0.3s ease; /* Smooth transition */
+    }
+
+    .custom-pagination .page-item.active .page-link {
+        background-color: white ;
+        color: black ;
+        border-color: black;
+    }
+
+    .custom-pagination .page-item.disabled .page-link {
+        background-color: #d3d3d3; /* Disabled background */
+        color: #6c757d; /* Disabled text color */
+    }
+
+    .custom-pagination .page-item .page-link:hover {
+        background-color: #2b3b4b; /* Darken color on hover */
+        color: white;
+    }
+
+    .custom-pagination .page-item.disabled .page-link:hover {
+        background-color: #d3d3d3; /* No hover effect for disabled */
+    }
+
+    .custom-pagination .page-item .page-link:focus {
+        box-shadow: none; /* Remove default focus shadow */
+        outline: none; /* Remove focus outline */
+    }
+
+    /* Style for previous and next arrows */
+    .custom-pagination .page-link span[aria-hidden="true"] {
+        font-size: 1.25rem; /* Increase the size of the arrows */
+        vertical-align: middle;
+    }
+
+    /* Additional styling for pagination */
+    .custom-pagination .page-item {
+        padding: 0;
+    }
+
+</style>
+
+

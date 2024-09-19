@@ -28,22 +28,22 @@ namespace CyrusCustomer.Controllers
         }
 
             [HttpGet]
-        [Authorize]
+        //[Authorize]
             //[Authorize(Roles = "Admin")]
             public IActionResult Register()
             {
             var user = User.Identity.Name;
-            if (user != "admin@Cyrus.com")
-            {
-                return Unauthorized(); // or RedirectToAction("AccessDenied", "Account");
-            }
+            //if (user != "admin@Cyrus.com")
+            //{
+            //    return Unauthorized(); // or RedirectToAction("AccessDenied", "Account");
+            //}
 
             return View();
             }
 
             [HttpPost]
         //[Authorize(Roles = "Admin")]
-        [Authorize]
+        //[Authorize]
             public async Task<IActionResult> Register(RegisterViewModel model)
             {
             if (ModelState.IsValid)
