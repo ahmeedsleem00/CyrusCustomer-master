@@ -26,10 +26,12 @@
 
 @using (Html.BeginForm("Index", "Customer", FormMethod.Get))
 {
-    <div class="form-group">
+    <div class="form-group pb-3">
         <input type="text" name="searchString" class="form-control" placeholder="Search by Customer Name, Tax ID, Year, Month" value="@Model.SearchString" />
     </div>
     <button type="submit" class="btn btn-primary">Search</button>
+    <a href="@Url.Action("Index", "Customer")" class="btn btn-secondary">Reset</a>
+
 }
 
 
@@ -74,8 +76,8 @@
 
                     {
                    <td>@item.By</td>
-                   <td>@item.Status</td>
-                    <td>
+                        <td>@item.Status.ToString()</td>
+                        <td>
                         <input type="checkbox" class="form-check-input me-2" disabled @(item.IsUpdated ? "checked" : "") />
                     </td>
                     }
@@ -94,6 +96,10 @@
                         </div>
                     </td>
                     <td>
+                        @if (User.Identity.Name == "admin@Cyrus.com")
+                        {
+                            
+                            }
                         @if (Model.CustomerAssignments.ContainsKey(item.Id))
                         {
                             <ul>
@@ -220,12 +226,12 @@
 
 <style>
     .custom-pagination .page-item .page-link {
-        background-color: #1f2f3f; /* Custom background color */
-        color: white; /* Text color */
-        border: 1px solid #1f2f3f; /* Border color */
-        margin: 0 5px; /* Space between buttons */
-        border-radius: 5px; /* Rounded corners */
-        transition: all 0.3s ease; /* Smooth transition */
+        background-color: #1f2f3f; 
+        color: white; 
+        border: 1px solid #1f2f3f;
+        margin: 0 5px; 
+        border-radius: 5px;
+        transition: all 0.3s ease;
     }
 
     .custom-pagination .page-item.active .page-link {
@@ -235,17 +241,17 @@
     }
 
     .custom-pagination .page-item.disabled .page-link {
-        background-color: #d3d3d3; /* Disabled background */
-        color: #6c757d; /* Disabled text color */
+        background-color: #d3d3d3; 
+        color: #6c757d; 
     }
 
     .custom-pagination .page-item .page-link:hover {
-        background-color: #2b3b4b; /* Darken color on hover */
+        background-color: #2b3b4b; 
         color: white;
     }
 
     .custom-pagination .page-item.disabled .page-link:hover {
-        background-color: #d3d3d3; /* No hover effect for disabled */
+        background-color: #d3d3d3; 
     }
 
     .custom-pagination .page-item .page-link:focus {

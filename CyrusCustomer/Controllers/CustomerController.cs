@@ -29,7 +29,22 @@ namespace CyrusCustomer.Controllers
             this._userManager = userManager;
         }
 
+        #region Status Count View
+        public async Task<IActionResult> StatusCounts()
+        {
+            var statusCounts = await _context.Customers
+                .GroupBy(c => c.Status)
+                .Select(g => new StatusCountViewModel
+                {
+                    Status = g.Key.ToString(),
+                    Count = g.Count()
+                })
+                .ToListAsync();
 
+            return View(statusCounts);
+        }
+
+        #endregion
 
         #region Index and Upload and ViewBranches
 
@@ -108,7 +123,7 @@ namespace CyrusCustomer.Controllers
                 users = _userManager.Users.Select(u => new SelectListItem
                 {
                     Value = u.Id,
-                    Text = u.UserName
+                    Text = u.Email
                 });
             }
 
@@ -118,7 +133,8 @@ namespace CyrusCustomer.Controllers
                 PaginatedCustomers = new PaginatedList<Customer>(customers, totalRecords, pageNumber, pageSize),
                 CustomerAssignments = customerAssignmentsDict,
                 SearchString = searchString, // Pass the search string to the view
-                SelectedUserId = selectedUserId // Pass the selected user ID to the view
+                SelectedUserId = selectedUserId,// Pass the selected user ID to the view
+
             };
 
             return View(viewModel);
@@ -160,27 +176,8 @@ namespace CyrusCustomer.Controllers
 
         #region Assign Methods
 
-        //[HttpPost]
-        //public IActionResult AssignCustomers(AssignViewModel model)
-        //{
-        //    // Logic to assign customers to the selected user
-        //    if (model.SelectedUserId != null && model.PaginatedCustomers != null)
-        //    {
-        //        // Perform the customer assignment logic
-        //        TempData["SuccessMessage"] = "Customers assigned successfully!";
-        //    }
-        //    else
-        //    {
-        //        TempData["ErrorMessage"] = "Please select both user and customers to assign.";
-        //    }
-
-        //    return RedirectToAction("Index");
-        //}
-
-        //Select All Method:
 
 
-       
 
         [HttpPost]
         //[Authorize(Roles = "Admin")]  // Only Admin can access this method
@@ -519,9 +516,10 @@ namespace CyrusCustomer.Controllers
 
         #endregion
 
+
         #region Excel Sheet Methods
 
-    
+
         private async Task UpdateCustomersFromExcel(IFormFile file)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -546,11 +544,13 @@ namespace CyrusCustomer.Controllers
 
                     var rowCount = worksheet.Dimension.Rows;
 
+
+
                     // Use a dictionary to group branch names by customer
-                    var customerBranches = new Dictionary<string, List<string>>();
+                    //var customerBranches = new Dictionary<string, List<string>>();
                     var customerData = new List<(string Year, string Month, string CountOfBranches, string CustomerName, string TaxId, string BranchName, string ResponsiblePerson, string Phone, string UserUpdated, DateTime UpdateDate,
                             decimal Amount1, decimal Amount2, decimal Amount3, bool Collected
-                        , string Contractor, string ContractorPhoneNumber, string InternalAccountant, string InternalAccountantPhone, string CharteredAccountant, string CharteredAccountantPhone,string User, string by)>();
+                        , string Contractor, string ContractorPhoneNumber, string InternalAccountant, string InternalAccountantPhone, string CharteredAccountant, string CharteredAccountantPhone, string User, string by, CustomerStatus Status)>();
 
                     for (int row = 2; row <= rowCount; row++)
                     {
@@ -572,7 +572,7 @@ namespace CyrusCustomer.Controllers
                         var by = worksheet.Cells[row, 15].Text.Trim();
                         var userUpdated = worksheet.Cells[row, 9].Text.Trim();
                         var updateDateCell = worksheet.Cells[row, 10].Text.Trim();
-                        var users = worksheet.Cells[row, 18].Text.Trim(); // Users column should be in column 18
+                        //var users = worksheet.Cells[row, 18].Text.Trim(); // Users column should be in column 18
 
                         // Parse new properties
                         decimal amount1 = 0;
@@ -589,135 +589,153 @@ namespace CyrusCustomer.Controllers
 
                         DateTime.TryParse(updateDateCell, out DateTime updateDate);
 
-
-                        customerData.Add((year, month, countOfBranches, customerName,
-                       taxId, branchName, responsiblePerson, phone,
-                       userUpdated, updateDate, amount1, amount2, amount3, collected,
-                       contractor, contractorPhoneNumber,
-                       internalAccountant, internalAccountantPhone,
-                       charteredAccountant, charteredAccountantPhone, "DefaultUser",by));
-
-                        // Group branches by customer
-                        if (!customerBranches.ContainsKey(customerName))
+                        CustomerStatus customerStatus;
+                        if (!Enum.TryParse(status, true, out customerStatus))
                         {
-                            customerBranches[customerName] = new List<string>();
+                            customerStatus = CustomerStatus.NA; // or whatever default you want
                         }
-                        customerBranches[customerName].Add(branchName);
+                        // Get userId from the "By" column
 
-                        // Group branches by customer TaxId
-                        if (!customerBranches.ContainsKey(taxId))
-                        {
-                            customerBranches[taxId] = new List<string>();
-                        }
+                        customerData.Add((year, month, countOfBranches, customerName, taxId, branchName, responsiblePerson, phone, userUpdated, updateDate, amount1, amount2, amount3, collected, contractor, contractorPhoneNumber, internalAccountant, internalAccountantPhone, charteredAccountant, charteredAccountantPhone, "DefaultUser", by, customerStatus));
 
-                        if (!customerBranches[taxId].Contains(branchName))
-                        {
-                            customerBranches[taxId].Add(branchName);
-                        }
-                    }
 
-                    var existingCustomers = await _context.Customers.Include(c => c.Branches).ToListAsync();
+                        //// Group branches by customer
+                        ///
+                        //if (!customerBranches.ContainsKey(customerName))
+                        //{
+                        //    customerBranches[customerName] = new List<string>();
+                        //}
+                        //customerBranches[customerName].Add(branchName);
 
-                    var joinedData = from excelData in customerData
-                                     join dbCustomer in existingCustomers
-                                     on excelData.TaxId equals dbCustomer.TaxId into joined
-                                     from customer in joined.DefaultIfEmpty()
-                                     select new
-                                     {
-                                         ExcelData = excelData,
-                                         DbCustomer = customer
-                                     };
+                        //// Group branches by customer TaxId
+                        //if (!customerBranches.ContainsKey(taxId))
+                        //{
+                        //    customerBranches[taxId] = new List<string>();
+                        //}
 
-                    foreach (var item in joinedData)
+                        //if (!customerBranches[taxId].Contains(branchName))
+                        //{
+                        //    customerBranches[taxId].Add(branchName);
+                        //}
+                        // }
+
+
+                        //var joinedData = from excelData in customerData
+                        //                 join dbCustomer in existingCustomers
+                        //                 on excelData.TaxId equals dbCustomer.TaxId into joined
+                        //                 from customer in joined.DefaultIfEmpty()
+                        //                 select new
+                        //                 {
+                        //                     ExcelData = excelData,
+                        //                     DbCustomer = customer
+                        //                 };
+
+              
+                }
+                    var existingCustomers = await _context.Customers.ToListAsync();
+                    var users = await _context.Users.ToListAsync(); // Fetch all users from the database
+
+                    foreach (var data in customerData)
                     {
-                        if (item.DbCustomer != null)
+                        // Find the user from the database whose UserName matches the 'By' column from Excel
+
+                        var customer = existingCustomers.FirstOrDefault(c => c.TaxId == data.TaxId);
+
+
+                        if (customer != null)
                         {
-                            // Existing customer, update details
-                            item.DbCustomer.Name = item.ExcelData.CustomerName;
-                            item.DbCustomer.Phone = item.ExcelData.Phone;
-                            item.DbCustomer.ResponsiblePerson = item.ExcelData.ResponsiblePerson;
-                            item.DbCustomer.UserUpdated = item.ExcelData.UserUpdated ?? "DefaultUser"; // Set a default value if null
-                            item.DbCustomer.UpdateDate = item.ExcelData.UpdateDate;
-                            item.DbCustomer.By = item.ExcelData.by;
-                            item.DbCustomer.Amount1 = item.ExcelData.Amount1;
-                            item.DbCustomer.Amount2 = item.ExcelData.Amount2;
-                            item.DbCustomer.Amount3 = item.ExcelData.Amount3;
-                            item.DbCustomer.Collected = item.ExcelData.Collected;
-                            // Add new branch if not exists
-                            if (item.DbCustomer.Branches.All(b => b.BranchName != item.ExcelData.BranchName))
+                            // Update existing customer details
+                            customer.Name = data.CustomerName;
+                            customer.Phone = data.Phone;
+                            customer.ResponsiblePerson = data.ResponsiblePerson;
+                            customer.UserUpdated = data.UserUpdated ?? "DefaultUser";
+                            customer.UpdateDate = data.UpdateDate;
+                            customer.Amount1 = data.Amount1;
+                            customer.Amount2 = data.Amount2;
+                            customer.Amount3 = data.Amount3;
+                            customer.Status = data.Status;
+                            customer.Collected = data.Collected;
+
+
+                            if (customer.Branches.All(b => b.BranchName != data.BranchName))
                             {
-                                item.DbCustomer.Branches.Add(new Branch { BranchName = item.ExcelData.BranchName });
+                                customer.Branches.Add(new Branch { BranchName = data.BranchName });
                             }
 
-                            _context.Customers.Update(item.DbCustomer);
+                            _context.Customers.Update(customer);
                         }
                         else
                         {
-                            // Initialize long variables for the properties that need conversion
-                            long contractorPhoneNumber = 0;
-                            long internalAccountant = 0;
-                            long internalAccountantPhone = 0;
-                            long charteredAccountant = 0;
-                            long charteredAccountantPhone = 0;
-                            //int countOfBranches = /*1*/; // Assuming this is an integer that needs parsing
+                            long contractorPhone;
+                            long internalAccountantPhoneNumber;
 
-                            // Try parsing each property from ExcelData
-                            long.TryParse(item.ExcelData.ContractorPhoneNumber, out contractorPhoneNumber);
-                            long.TryParse(item.ExcelData.InternalAccountant, out internalAccountant);
-                            long.TryParse(item.ExcelData.InternalAccountantPhone, out internalAccountantPhone);
-                            long.TryParse(item.ExcelData.CharteredAccountant, out charteredAccountant);
-                            long.TryParse(item.ExcelData.CharteredAccountantPhone, out charteredAccountantPhone);
-                            //int.TryParse(item.ExcelData.CountOfBranches, out countOfBranches);
+                            long charteredAccountantPhoneNumber;
+
+                            // Try parsing each property from string to long
+                            long.TryParse(data.ContractorPhoneNumber, out contractorPhone);
+                            long.TryParse(data.InternalAccountantPhone, out internalAccountantPhoneNumber);
+                            long.TryParse(data.CharteredAccountantPhone, out charteredAccountantPhoneNumber);
+
+
 
                             // New customer
+
                             var newCustomer = new Customer
                             {
-                                Name = item.ExcelData.CustomerName,
-                                TaxId = item.ExcelData.TaxId,
-                                Phone = item.ExcelData.Phone,
-                                Year = item.ExcelData.Year,
-                                Month = item.ExcelData.Month,
-                                CountOfBranches = item.ExcelData.CountOfBranches, // Convert back to string to match Customer class property
-                                ResponsiblePerson = item.ExcelData.ResponsiblePerson,
-                                Contractor = item.ExcelData.Contractor,
-                                ContractorPhoneNumber = contractorPhoneNumber, // Convert back to string
-                                InternalAccountant = internalAccountant.ToString(), // Convert back to string
-                                InternalAccountantPhone = internalAccountantPhone, // Convert back to string
-                                CharteredAccountant = charteredAccountant.ToString(), // Convert back to string
-                                CharteredAccountantPhone = charteredAccountantPhone, // Convert back to string
-                                UserUpdated = item.ExcelData.UserUpdated ?? "DefaultUser", // Set a default value if null
-                                By = item.ExcelData.by,
-                                Amount1 = item.ExcelData.Amount1,
-                                Amount2 = item.ExcelData.Amount2,
-                                Amount3 = item.ExcelData.Amount3,
-                                Collected = item.ExcelData.Collected,
-                                Branches = new List<Branch>
-                                {
-                                    new Branch { BranchName = item.ExcelData.BranchName }
-                                }
-                            };
+                                Name = data.CustomerName,
+                                TaxId = data.TaxId,
+                                Phone = data.Phone,
+                                Year = data.Year,
+                                Month = data.Month,
+                                CountOfBranches = data.CountOfBranches,
+                                ResponsiblePerson = data.ResponsiblePerson,
+                                Contractor = data.Contractor,
+                                ContractorPhoneNumber = contractorPhone, // Ensure it's a string
+                                InternalAccountant = data.InternalAccountant?.ToString(), // Ensure it's a string
+                                InternalAccountantPhone = internalAccountantPhoneNumber, // Ensure it's a string
+                                CharteredAccountantPhone = charteredAccountantPhoneNumber,
+                                CharteredAccountant = data.CharteredAccountant?.ToString(), // Ensure it's a string
 
+                                UserUpdated = data.UserUpdated ?? "DefaultUser",
+                                Status = data.Status,
+                                By = data.by,
+                                Amount1 = data.Amount1,
+                                Amount2 = data.Amount2,
+                                Amount3 = data.Amount3,
+                                Collected = data.Collected,
+                                Branches = new List<Branch> { new Branch { BranchName = data.BranchName } }
+                            };
                             _context.Customers.Add(newCustomer);
+                            customer = newCustomer;
+
                         }
+                        _context.SaveChanges();
+
+                        var assignedUser = users.FirstOrDefault(u => u.UserName == data.by);
+
+                        if (assignedUser != null)
+                        {
+                            _context.CustomerUserAssignments.Add(new CustomerUserAssignment { CustomerId = customer.Id, UserId = assignedUser.Id });
+                        }
+
                     }
 
 
                     try
                     {
                         await _context.SaveChangesAsync();
-                        Console.WriteLine("Data saved successfully.");
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine("Error occurred: " + ex.Message);
                     }
                 }
-            }
 
             var customers = await _context.Customers.ToListAsync();
-
         }
     
+            }
+        
 
         [HttpPost]
         public async Task<IActionResult> UploadExcel(IFormFile file)

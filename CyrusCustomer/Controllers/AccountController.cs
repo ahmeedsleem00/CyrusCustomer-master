@@ -94,7 +94,7 @@ namespace CyrusCustomer.Controllers
                     // Create a new IdentityUser (or your custom ApplicationUser class)
                     var user = new ApplicationUser
                     {
-                        UserName = model.Email,
+                        UserName = model.Name,
                         Email = model.Email,
                         PasswordHash = model.Password
                         // Add any additional fields from your model if necessary (e.g., Name)
@@ -141,13 +141,21 @@ namespace CyrusCustomer.Controllers
             {
                 ModelState.AddModelError(string.Empty, "Email and Password are required.");
                 return View(model); // Return the same view with an error message
-            }   
+            }
+            var user = await _userManager.FindByEmailAsync(model.Email);
 
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-
-            if (result.Succeeded)
+            if (user != null)
             {
-                return RedirectToAction("Index", "Customer");
+                var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index", "Customer");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return View(model);
+                }
             }
             else
             {
@@ -200,15 +208,15 @@ namespace CyrusCustomer.Controllers
                 {
                     await userManager.AddToRoleAsync(adminUser, "Admin");
                 }
-                else
-                {
-                    // Handle failure if needed
-                    foreach (var error in userResult.Errors)
-                    {
-                        // Log or display the error
-                        Console.WriteLine($"Error creating user {adminUser.UserName}: {error.Description}");
-                    }
-                }
+                //else
+                //{
+                //    // Handle failure if needed
+                //    foreach (var error in userResult.Errors)
+                //    {
+                //        // Log or display the error
+                //        Console.WriteLine($"Error creating user {adminUser.UserName}: {error.Description}");
+                //    }
+                //}
             }
 
         }

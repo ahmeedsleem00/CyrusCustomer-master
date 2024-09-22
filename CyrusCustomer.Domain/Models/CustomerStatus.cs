@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace CyrusCustomer.Domain.Models
 {
-    public enum CustomerStatus
-    {
-        Yes,
-        No,
-        Pending,
-        NA, 
-        Non
-    }
+        public enum CustomerStatus
+        {
+            Yes,
+            No,
+            Pending,
+            NA, 
+            Non
+        }
 }

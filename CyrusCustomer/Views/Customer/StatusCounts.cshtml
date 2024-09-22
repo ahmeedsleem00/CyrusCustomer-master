@@ -1,0 +1,26 @@
+﻿@model IEnumerable<CyrusCustomer.Models.StatusCountViewModel>
+
+@{
+    ViewData["Title"] = "StatusCounts";
+}
+
+
+<h1>StatusCounts</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var statusCount in Model)
+        {
+            <tr>
+                <td>@statusCount.Status</td>
+                <td>@statusCount.Count</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -70,8 +70,8 @@ namespace CyrusCustomer.Spreadsheet
                         Amount3 = amount3,
                         Collected = collected,
                         By = worksheet.Cells[row, 15].Text,
-                        UpdateDate = DateTime.Parse(worksheet.Cells[row, 21].Text), // Assuming this is the correct column for UpdateDate
-                        Notes = worksheet.Cells[row, 16].Text, // Assuming this is the correct column for Notes
+                        UpdateDate = DateTime.Parse(worksheet.Cells[row, 21].Text),
+                        Notes = worksheet.Cells[row, 16].Text, 
                     };
                     customers.Add(customer);
                 }
@@ -81,14 +81,36 @@ namespace CyrusCustomer.Spreadsheet
 
         private static CustomerStatus ConvertStringToStatus(string statusText)
         {
-            return statusText switch
+            return statusText.Trim() switch
             {
                 "Yes" => CustomerStatus.Yes,
                 "No" => CustomerStatus.No,
                 "Pending" => CustomerStatus.Pending,
-                "N/A" => CustomerStatus.NA,
+                "NA" => CustomerStatus.NA,
                 "Non" => CustomerStatus.Non,
+                _ => throw new ArgumentException($"Unexpected status: {statusText}") // Default case to handle unknown inputs
+
             };
         }
+
+        public static string GetFriendlyStatusString(CustomerStatus status)
+        {
+            switch (status)
+            {
+                case CustomerStatus.Yes:
+                    return "Yes";
+                case CustomerStatus.No:
+                    return "No";
+                case CustomerStatus.Pending:
+                    return "Pending";
+                case CustomerStatus.NA:
+                    return "Not Available";
+                case CustomerStatus.Non:
+                    return "None";
+                default:
+                    return "Unknown";
+            }
+        }
+
     }
 }

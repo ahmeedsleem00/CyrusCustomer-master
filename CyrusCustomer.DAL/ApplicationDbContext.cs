@@ -31,19 +31,26 @@ namespace CyrusCustomer.DAL
                         .OnDelete(DeleteBehavior.Cascade);
 
 
+            modelBuilder.Entity<Customer>()
+                .Property(c => c.Status)
+                .HasConversion(
+                    v => v.ToString(), // Store the enum as a string
+                    v => (CustomerStatus)Enum.Parse(typeof(CustomerStatus), v) // Retrieve the enum from the stored string
+                );
 
-     //       modelBuilder.Entity<Credential>().HasData(
-     //    new Credential { Id = 1, Email = "admin@Cyrus.com", Password = "Cyrus@2024", Name = "Admin" },
-     //    new Credential { Id = 2, Email = "tony@Cyrus.com", Password = "Cyrus@2024", Name = "Tony" },
-     //    new Credential { Id = 3, Email = "mahmoud@Cyrus.com", Password = "Cyrus@2024", Name = "Mahmoud" },
-     //    new Credential { Id = 4, Email = "mina@Cyrus.com", Password = "Cyrus@2024", Name = "Mina"},
-     //    new Credential { Id = 5, Email = "mohamad@Cyrus.com", Password = "Cyrus@2024", Name = "Mohamad" },
-     //    new Credential { Id = 6, Email = "amr@Cyrus.com", Password = "Cyrus@2024", Name = "Amro" },
-     //    new Credential { Id = 7, Email = "youssef@Cyrus.com", Password = "Cyrus@2024", Name = "Youssef" },
-     //    new Credential { Id = 8, Email = "sameh@Cyrus.com", Password = "Cyrus@2024", Name = "Sameh" }
-     //);
 
-            
+            //       modelBuilder.Entity<Credential>().HasData(
+            //    new Credential { Id = 1, Email = "admin@Cyrus.com", Password = "Cyrus@2024", Name = "Admin" },
+            //    new Credential { Id = 2, Email = "tony@Cyrus.com", Password = "Cyrus@2024", Name = "Tony" },
+            //    new Credential { Id = 3, Email = "mahmoud@Cyrus.com", Password = "Cyrus@2024", Name = "Mahmoud" },
+            //    new Credential { Id = 4, Email = "mina@Cyrus.com", Password = "Cyrus@2024", Name = "Mina"},
+            //    new Credential { Id = 5, Email = "mohamad@Cyrus.com", Password = "Cyrus@2024", Name = "Mohamad" },
+            //    new Credential { Id = 6, Email = "amr@Cyrus.com", Password = "Cyrus@2024", Name = "Amro" },
+            //    new Credential { Id = 7, Email = "youssef@Cyrus.com", Password = "Cyrus@2024", Name = "Youssef" },
+            //    new Credential { Id = 8, Email = "sameh@Cyrus.com", Password = "Cyrus@2024", Name = "Sameh" }
+            //);
+
+
             base.OnModelCreating(modelBuilder);
             }
 
