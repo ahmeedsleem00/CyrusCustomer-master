@@ -1,0 +1,275 @@
+﻿@model AssignViewModel
+
+@{
+    ViewData["Title"] = "Customer List";
+     // var isAdmin = ViewBag.IsAdmin != null && (bool)ViewBag.IsAdmin;
+}
+<h2>@ViewData["Title"]</h2>
+
+@if (User.Identity.Name == "admin@Cyrus.com")
+
+{
+<p>
+    <a asp-action="Create" style="text-decoration: none;" class="btn btn-dark">Create New</a>
+    <a asp-action="Upload" class="btn btn-primary" style="margin-left: 10px;">Upload Excel</a>
+     
+
+    @using (Html.BeginForm("DeleteAll", "Customer", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete all customer data?');">
+            Delete All Customer Data
+        </button>
+    }
+</p>
+}
+
+@using (Html.BeginForm("Index", "Customer", FormMethod.Get))
+{
+    <div class="form-group pb-3">
+        <input type="text" name="searchString" class="form-control" placeholder="Search by Customer Name, Tax ID, Year, Month" value="@Model.SearchString" />
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+    <a href="@Url.Action("Index", "Customer")" class="btn btn-secondary">Reset</a>
+
+}
+
+
+
+
+<!-- Customer List with Checkboxes -->
+<form asp-action="AssignCustomers" method="post">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+               
+                <th>تاريخ الفاتورة (السنوي)</th>
+                <th>تارخ الفاتور (الشهر)</th>
+                <th>سجل ضريبي</th>
+                <th>إسم الشركه</th>
+                <th>عدد الفروع</th>
+                    @if (User.Identity.Name == "admin@Cyrus.com")
+
+                            {
+                <th>By</th>
+
+                <th>Status</th>
+                <th>Updated</th>
+                <th>Select <br /> CST.</th>
+                <th>Assigned Users</th>
+                  }
+
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.PaginatedCustomers)
+            {
+                <tr>
+                   
+                    <td>@item.Year</td>
+                    <td>@item.Month</td>
+                    <td>@item.TaxId</td>
+                    <td>@item.Name</td>
+                    <td>@item.CountOfBranches</td>
+                    @if (User.Identity.Name == "admin@Cyrus.com")
+
+                    {
+                        <td>@item.By</td>
+                        <td>@item.Status.ToString()</td>
+                        <td>
+                        <input type="checkbox" class="form-check-input me-2" disabled @(item.IsUpdated ? "checked" : "") />
+                    </td>
+                    }
+                    <td>
+                        <div class="d-flex align-items-center">
+                            @if (User.Identity.Name == "admin@Cyrus.com")
+
+                            {
+
+                                <input type="checkbox" name="SelectedCustomerIds" class="form-check-input me-2" value="@item.Id" />
+                                <a asp-action="Edit" class="btn btn-success btn-sm me-2" asp-route-id="@item.Id">Edit</a>
+
+                            }
+
+                            <a asp-action="Details" class="btn btn-dark btn-sm" asp-route-id="@item.Id">Details</a>
+                        </div>
+                    </td>
+                    <td>
+                        @if (User.Identity.Name == "admin@Cyrus.com")
+                        {
+                            
+                            }
+                        @if (Model.CustomerAssignments.ContainsKey(item.Id))
+                        {
+                            <ul>
+                                @foreach (var userId in Model.CustomerAssignments[item.Id])
+                                {
+                                    <li>@Model.Users.FirstOrDefault(u => u.Value == userId)?.Text</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No users assigned</p>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (User.Identity.Name == "admin@Cyrus.com")
+
+    {
+        <!-- Submit button to assign selected customers -->
+        @* <form asp-action="AssignCustomers" method="post"> *@
+            @if (User.Identity.Name == "admin@Cyrus.com")
+            {
+                <div class="form-group">
+                    <!-- Dropdown to select a user -->
+                    <label for="SelectUserId">Select User</label>
+                    <select id="SelectUserId" name="Id" class="form-control">
+                        <option value="">-- Select User --</option>
+                        @foreach (var user in Model.Users)
+                        {
+                            if (user.Value == Model.SelectedUserId)
+                            {
+                                <option value="@user.Value" selected="selected">@user.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@user.Value">@user.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
+            <button type="submit" class="btn btn-success mt-3">Assign</button>
+        @* </form> *@
+    }
+</form>
+
+
+<!-- Using JQuery -->
+
+@section Scripts 
+{
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#assignButton').click(function () {
+                var selectedUserId = $('#SelectedUserId').val();
+                var selectedCustomerIds = $('input[name="SelectedCustomerIds"]:checked').map(function () {
+                    return $(this).val();
+                }).get();
+
+                $.ajax({
+                    url: '@Url.Action("AssignCustomers", "Customer")',
+                    type: 'POST',
+                    data: {
+                        SelectedUserId: selectedUserId,
+                        SelectedCustomerIds: selectedCustomerIds
+                    },
+                    success: function (response) {
+                        alert('Customers assigned successfully!');
+                        window.location.href = '@Url.Action("Index", "Customer")'; 
+                    },
+                    error: function () {
+                        alert('An error occurred while assigning customers.');
+                    }
+                });
+            });
+        });
+    </script>
+    }
+    <!-- end of Jquery -->
+<!-- Pagination Controls -->
+
+<nav aria-label="Page navigation">
+    <ul class="pagination custom-pagination justify-content-center">
+        <!-- Previous Page Link -->
+        <li class="page-item @(Model.PaginatedCustomers.HasPreviousPage ? "" : "disabled")">
+            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PaginatedCustomers.PageIndex - 1)"
+               asp-route-searchString="@Model.SearchString" asp-route-selectedUserId="@Model.SelectedUserId" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+
+        <!-- Page Numbers -->
+        @for (int i = 1; i <= Model.PaginatedCustomers.TotalPages; i++)
+        {
+            if (i == 1 || i == Model.PaginatedCustomers.TotalPages || (i >= Model.PaginatedCustomers.PageIndex - 2 && i <= Model.PaginatedCustomers.PageIndex + 2))
+            {
+                <li class="page-item @(i == Model.PaginatedCustomers.PageIndex ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i"
+                       asp-route-searchString="@Model.SearchString" asp-route-selectedUserId="@Model.SelectedUserId">@i</a>
+                </li>
+            }
+            else if (i == Model.PaginatedCustomers.PageIndex - 3 || i == Model.PaginatedCustomers.PageIndex + 3)
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            }
+        }
+
+        <!-- Next Page Link -->
+        <li class="page-item @(Model.PaginatedCustomers.HasNextPage ? "" : "disabled")">
+            <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PaginatedCustomers.PageIndex + 1)"
+               asp-route-searchString="@Model.SearchString" asp-route-selectedUserId="@Model.SelectedUserId" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<style>
+    .custom-pagination .page-item .page-link {
+        background-color: #1f2f3f; 
+        color: white; 
+        border: 1px solid #1f2f3f;
+        margin: 0 5px; 
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .custom-pagination .page-item.active .page-link {
+        background-color: white ;
+        color: black ;
+        border-color: black;
+    }
+
+    .custom-pagination .page-item.disabled .page-link {
+        background-color: #d3d3d3; 
+        color: #6c757d; 
+    }
+
+    .custom-pagination .page-item .page-link:hover {
+        background-color: #2b3b4b; 
+        color: white;
+    }
+
+    .custom-pagination .page-item.disabled .page-link:hover {
+        background-color: #d3d3d3; 
+    }
+
+    .custom-pagination .page-item .page-link:focus {
+        box-shadow: none; /* Remove default focus shadow */
+        outline: none; /* Remove focus outline */
+    }
+
+    /* Style for previous and next arrows */
+    .custom-pagination .page-link span[aria-hidden="true"] {
+        font-size: 1.25rem; /* Increase the size of the arrows */
+        vertical-align: middle;
+    }
+
+    /* Additional styling for pagination */
+    .custom-pagination .page-item {
+        padding: 0;
+    }
+
+</style>
+
+

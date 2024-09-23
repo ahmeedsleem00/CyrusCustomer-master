@@ -1,0 +1,37 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@* <div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Click the button below to manage customers.</p>
+
+    <a href="@Url.Action("Index", "Customer")" class="btn btn-primary">Go to Customer Section</a>
+</div> *@
+
+<center>
+    <h3>Welcome to The Home Page</h3>
+    <h1>Cyrus Customer Management System</h1>
+
+     @if (SignInManager.IsSignedIn(User))
+    {@*      @if (User.Identity.IsAuthenticated && User.Identity.Name == "admin@Cyrus.com")
+        {
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary">Register</a>
+
+        }   *@
+      @*   <form asp-controller="Account" asp-action="Logout" method="post">
+            <button type="submit" class="btn btn-danger">Logout</button>
+        </form> *@
+
+    }
+    else
+    {
+        <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Login</a>
+      
+    } 
+</center>
+
