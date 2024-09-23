@@ -1,11 +1,11 @@
-﻿@model IEnumerable<CyrusCustomer.Models.StatusCountViewModel>
+﻿@model ReportContainer
 
 @{
     ViewData["Title"] = "StatusCounts";
 }
 
 
-<h1>StatusCounts</h1>
+<h1>Status Report</h1>
 
 <table class="table">
     <thead>
@@ -15,11 +15,47 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var statusCount in Model)
+        @foreach (var statusCount in Model.Totals)
         {
             <tr>
                 <td>@statusCount.Status</td>
                 <td>@statusCount.Count</td>
+            </tr>
+         
+        }
+        <tr>
+            <td><strong>Total</strong></td>
+            <td><strong>@Model.GrandTotal</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Pending</th>
+            <th>Yes</th>
+            <th>No</th>
+            <th>N\A</th>
+            <th>Non</th>
+          
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var statusCount in Model.StatusCountViewModels)
+        {
+            <tr>
+                <td>@statusCount.UserName</td>
+                <td>@statusCount.Pending</td>
+                <td>@statusCount.Yes</td>
+                <td>@statusCount.No</td>
+                <td>@statusCount.NA</td>
+                <td>@statusCount.Non</td>
+
+
+
             </tr>
         }
     </tbody>

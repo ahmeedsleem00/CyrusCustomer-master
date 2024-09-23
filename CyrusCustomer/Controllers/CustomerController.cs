@@ -33,15 +33,43 @@ namespace CyrusCustomer.Controllers
         public async Task<IActionResult> StatusCounts()
         {
             var statusCounts = await _context.Customers
-                .GroupBy(c => c.Status)
+                        .Where(c => !string.IsNullOrEmpty(c.By)) 
+                .GroupBy(c => c.By)
                 .Select(g => new StatusCountViewModel
                 {
-                    Status = g.Key.ToString(),
-                    Count = g.Count()
+                    UserName = g.Key.ToString(),
+                    Pending = g.Where(obj=>obj.Status == CustomerStatus.Pending).Count(),
+                    Yes = g.Where(obj => obj.Status == CustomerStatus.Yes).Count(),
+                    No = g.Where(obj => obj.Status == CustomerStatus.No).Count(),
+                    Non = g.Where(obj => obj.Status == CustomerStatus.Non).Count(),
+                    NA = g.Where(obj=>obj.Status == CustomerStatus.NA).Count(), 
                 })
                 .ToListAsync();
 
-            return View(statusCounts);
+            // Calculate totals
+            //var totals = await _context.Customers
+            //    .GroupBy(c => c.Status)
+            //    .Select(g => new Totals
+            //    {
+            //        Status = g.Key.ToString(),
+            //        Count = g.Count(),
+            //    }).ToListAsync();
+
+            // Calculate grand total
+
+            var totals = await _context.Customers
+                .GroupBy(c => c.Status)
+                .Select(g => new Totals
+                {
+                    Status = g.Key.ToString(),
+                    Count = g.Count(),
+                }).ToListAsync();
+
+            var grandTotal = totals.Sum(t => t.Count);
+
+            return View(new ReportContainer { Totals = totals,StatusCountViewModels = statusCounts,
+                GrandTotal = grandTotal // Assuming you add this property to ReportContainer
+            });
         }
 
         #endregion

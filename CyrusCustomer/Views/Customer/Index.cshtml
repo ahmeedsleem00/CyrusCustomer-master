@@ -75,7 +75,7 @@
                     @if (User.Identity.Name == "admin@Cyrus.com")
 
                     {
-                   <td>@item.By</td>
+                        <td>@item.By</td>
                         <td>@item.Status.ToString()</td>
                         <td>
                         <input type="checkbox" class="form-check-input me-2" disabled @(item.IsUpdated ? "checked" : "") />
