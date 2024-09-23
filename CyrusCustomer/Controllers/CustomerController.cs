@@ -46,14 +46,7 @@ namespace CyrusCustomer.Controllers
                 })
                 .ToListAsync();
 
-            // Calculate totals
-            //var totals = await _context.Customers
-            //    .GroupBy(c => c.Status)
-            //    .Select(g => new Totals
-            //    {
-            //        Status = g.Key.ToString(),
-            //        Count = g.Count(),
-            //    }).ToListAsync();
+      
 
             // Calculate grand total
 
@@ -145,6 +138,7 @@ namespace CyrusCustomer.Controllers
                     g => g.Select(cua => cua.UserId).ToList()
                 );
 
+
             IEnumerable<SelectListItem> users = new List<SelectListItem>();
             if (isAdmin)
             {
@@ -160,8 +154,8 @@ namespace CyrusCustomer.Controllers
                 Users = users,
                 PaginatedCustomers = new PaginatedList<Customer>(customers, totalRecords, pageNumber, pageSize),
                 CustomerAssignments = customerAssignmentsDict,
-                SearchString = searchString, // Pass the search string to the view
-                SelectedUserId = selectedUserId,// Pass the selected user ID to the view
+                SearchString = searchString, 
+                SelectedUserId = selectedUserId,
 
             };
 
@@ -191,7 +185,7 @@ namespace CyrusCustomer.Controllers
             {
                 Id = b.Id,
                 BranchName = b.BranchName,
-                ResponsiblePerson = customers.ResponsiblePerson, // Or logic to fetch
+                ResponsiblePerson = customers.ResponsiblePerson, 
                 CustomerName = b.BranchName,
                 UserUpdated = b.UserUpdated,
                 UpdateDate = b.UpdateDate,
@@ -216,19 +210,35 @@ namespace CyrusCustomer.Controllers
                 return BadRequest("Invalid input.");
             }
 
-            var existingAssignments = _context.CustomerUserAssignments
-                .Where(cua => cua.UserId == Id);
+            var existingAssignments = await _context.CustomerUserAssignments
+                .Where(cua => cua.UserId == Id).ToListAsync();
 
+
+
+            // Update existing assignments and track new ones
             foreach (var customerId in SelectedCustomerIds)
-            {
-                var assignment = new CustomerUserAssignment
-                {
-                    CustomerId = customerId,
-                    UserId = Id
-                };
-                _context.CustomerUserAssignments.Add(assignment);
-            }
+            {// Check if the assignment already exists
+                var existingAssignment = existingAssignments
+                    .FirstOrDefault(cua => cua.CustomerId == customerId && cua.UserId == Id);
 
+                if (existingAssignment != null)
+                {
+                    // Update properties of the existing assignment if needed
+                    // For example, if you have properties to update, do it here
+                    // existingAssignment.SomeProperty = newValue;
+                    _context.CustomerUserAssignments.Update(existingAssignment);
+                }
+                else
+                {
+                    // If no existing assignment, create a new one
+                    var assignment = new CustomerUserAssignment
+                    {
+                        CustomerId = customerId,
+                        UserId = Id
+                    };
+                    _context.CustomerUserAssignments.Add(assignment);
+                }
+            }
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
@@ -684,6 +694,10 @@ namespace CyrusCustomer.Controllers
                             customer.Status = data.Status;
                             customer.Collected = data.Collected;
 
+                            if (customer.Branches == null)
+                            {
+                                customer.Branches = new List<Branch>(); // Replace Branch with your actual branch type
+                            }
 
                             if (customer.Branches.All(b => b.BranchName != data.BranchName))
                             {
@@ -737,14 +751,33 @@ namespace CyrusCustomer.Controllers
                             customer = newCustomer;
 
                         }
-                        _context.SaveChanges();
 
+
+                        // Check for existing assignment
                         var assignedUser = users.FirstOrDefault(u => u.UserName == data.by);
-
                         if (assignedUser != null)
                         {
-                            _context.CustomerUserAssignments.Add(new CustomerUserAssignment { CustomerId = customer.Id, UserId = assignedUser.Id });
+                            var existingAssignment = await _context.CustomerUserAssignments
+                      .FirstOrDefaultAsync(cua => cua.CustomerId == customer.Id);
+
+                            if (existingAssignment != null)
+                            {
+
+                                existingAssignment.UserId = assignedUser.Id;
+                                _context.CustomerUserAssignments.Update(existingAssignment);
+                            }
+                            else { 
+                            // If it doesn't exist, create a new assignment
+                            var newAssignment = new CustomerUserAssignment
+                                {
+                                    CustomerId = customer.Id,
+                                    UserId = assignedUser.Id
+                                };
+                                await _context.CustomerUserAssignments.AddAsync(newAssignment);
+                            }
                         }
+                        _context.SaveChanges();
+
 
                     }
 
