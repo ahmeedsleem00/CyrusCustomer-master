@@ -11,6 +11,7 @@
 <p>
     <a asp-action="Create" style="text-decoration: none;" class="btn btn-dark">Create New</a>
     <a asp-action="Upload" class="btn btn-primary" style="margin-left: 10px;">Upload Excel</a>
+
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap" rel="stylesheet">
@@ -37,29 +38,25 @@
 
 
 
-
 <!-- Customer List with Checkboxes -->
 <form asp-action="AssignCustomers" method="post">
     <table class="table table-striped">
         <thead>
             <tr>
-               
                 <th>تاريخ الفاتورة (السنوي)</th>
-                <th>تارخ الفاتور (الشهر)</th>
+                <th>تاريخ الفاتورة (الشهر)</th>
                 <th>سجل ضريبي</th>
-                <th>إسم الشركه</th>
+                <th>إسم الشركة</th>
                 <th>عدد الفروع</th>
-                    @if (User.Identity.Name == "admin@Cyrus.com")
 
-                            {
-                <th>By</th>
-
+                @if (User.Identity.Name == "admin@Cyrus.com")
+                {
+                    <th>By</th>
+                    <th>Status</th>
+                    <th>Updated</th>
+                    <th>Select CST</th>
+                }
                 <th>Status</th>
-                <th>Updated</th>
-                <th>Select <br /> CST.</th>
-                <th>Assigned Users</th>
-                  }
-
             </tr>
         </thead>
 
@@ -67,52 +64,48 @@
             @foreach (var item in Model.PaginatedCustomers)
             {
                 <tr>
-                   
                     <td>@item.Year</td>
                     <td>@item.Month</td>
                     <td>@item.TaxId</td>
                     <td>@item.Name</td>
                     <td>@item.CountOfBranches</td>
-                    @if (User.Identity.Name == "admin@Cyrus.com")
 
+                    @if (User.Identity.Name == "admin@Cyrus.com")
                     {
                         <td>@item.By</td>
-                        <td>@item.Status.ToString()</td>
                         <td>
-                        <input type="checkbox" class="form-check-input me-2" disabled @(item.IsUpdated ? "checked" : "") />
-                    </td>
+                            <input type="checkbox" class="form-check-input me-2" disabled @(item.IsUpdated ? "checked" : "") />
+                        </td>
                     }
+                    <td>@item.Status.ToString()</td>
                     <td>
                         <div class="d-flex align-items-center">
                             @if (User.Identity.Name == "admin@Cyrus.com")
-
                             {
-
                                 <input type="checkbox" name="SelectedCustomerIds" class="form-check-input me-2" value="@item.Id" />
                                 <a asp-action="Edit" class="btn btn-success btn-sm me-2" asp-route-id="@item.Id">Edit</a>
-
                             }
 
                             <a asp-action="Details" class="btn btn-dark btn-sm" asp-route-id="@item.Id">Details</a>
                         </div>
                     </td>
+
                     <td>
                         @if (User.Identity.Name == "admin@Cyrus.com")
                         {
-                             
-                        @if (Model.CustomerAssignments.ContainsKey(item.Id))
-                        {
-                            <ul>
-                                @foreach (var userId in Model.CustomerAssignments[item.Id])
-                                {
-                                    <li>@Model.Users.FirstOrDefault(u => u.Value == userId)?.Text</li>
-                                }
-                            </ul>
-                        }
-                        else
-                        {
-                            <p>No users assigned</p>
-                        }
+                            @if (Model.CustomerAssignments.ContainsKey(item.Id))
+                            {
+                                <ul>
+                                    @foreach (var userId in Model.CustomerAssignments[item.Id])
+                                    {
+                                        <li>@Model.Users.FirstOrDefault(u => u.Value == userId)?.Text</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p>No users assigned</p>
+                            }
                         }
                     </td>
                 </tr>

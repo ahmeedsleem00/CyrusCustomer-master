@@ -11,6 +11,8 @@ namespace CyrusCustomer.Domain.Models
         public string UserId { get; set; }
         //public  ApplicationUser User { get; set; }
         public virtual Customer Customer { get; set; }
-        //public string? By { get; set; }
+        public string? By { get; set; }
+       // public virtual ApplicationUser User { get; set; } // Reference to the user
+
     }
 }

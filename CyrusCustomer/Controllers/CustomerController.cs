@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using System.Diagnostics.Contracts;
 using System.Net;
+using System.Security.Claims;
 
 namespace CyrusCustomer.Controllers
 {
@@ -81,12 +82,12 @@ namespace CyrusCustomer.Controllers
             }
             else
             {
-                var userCustomers = await _context.CustomerUserAssignments
-                    .Where(uc => uc.UserId == user.Id)
-                    .Select(uc => uc.Customer)
+                // Non-admin sees all customers except those with status "Yes"
+                var nonAdminCustomers = await _context.Customers
+                    .Where(c => c.Status != CustomerStatus.Yes)
                     .ToListAsync();
 
-                return View(userCustomers); // Non-admin sees assigned customers only
+                return View(nonAdminCustomers);
             }
 
 
@@ -103,21 +104,22 @@ namespace CyrusCustomer.Controllers
 
             if (!isAdmin)
             {
-                var assignedCustomerIds = _context.CustomerUserAssignments
+                var assignedCustomerIds = await _context.CustomerUserAssignments
                     .Where(cua => cua.UserId == user.Id)
-                    .Select(cua => cua.CustomerId);
+                    .Select(cua => cua.CustomerId)
+                    .ToListAsync();
 
-                customersQuery = customersQuery.Where(c => assignedCustomerIds.Contains(c.Id));
+                customersQuery = customersQuery.Where(c => assignedCustomerIds.Contains(c.Id) && c.Status != CustomerStatus.Yes);
             }
 
-            if (!String.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(searchString))
             {
                 customersQuery = customersQuery.Where(s => s.Name.Contains(searchString.Trim())
-                                                    || s.TaxId.Contains(searchString.Trim())
-                                                    || s.CountOfBranches.Contains(searchString.Trim())
-                                                    || s.Month.Contains(searchString.Trim())
-                                                    || s.Year.Contains(searchString.Trim())
-                                                    || s.By.Contains(searchString.Trim()));
+                                                        || s.TaxId.Contains(searchString.Trim())
+                                                        || s.CountOfBranches.Contains(searchString.Trim())
+                                                        || s.Month.Contains(searchString.Trim())
+                                                        || s.Year.Contains(searchString.Trim())
+                                                        || s.By.Contains(searchString.Trim()));
             }
 
             int totalRecords = await customersQuery.CountAsync();
@@ -131,16 +133,9 @@ namespace CyrusCustomer.Controllers
                 .Where(cua => customers.Select(c => c.Id).Contains(cua.CustomerId))
                 .ToListAsync();
 
-          
-
-
             var customerAssignmentsDict = customerAssignments
                 .GroupBy(cua => cua.CustomerId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(cua => cua.UserId).ToList()
-                );
-
+                .ToDictionary(g => g.Key, g => g.Select(cua => cua.UserId).ToList());
 
             IEnumerable<SelectListItem> users = new List<SelectListItem>();
             if (isAdmin)
@@ -157,15 +152,13 @@ namespace CyrusCustomer.Controllers
                 Users = users,
                 PaginatedCustomers = new PaginatedList<Customer>(customers, totalRecords, pageNumber, pageSize),
                 CustomerAssignments = customerAssignmentsDict,
-                SearchString = searchString, 
+                SearchString = searchString,
                 SelectedUserId = selectedUserId,
-
             };
 
             return View(viewModel);
-
-
         }
+
 
 
 
@@ -213,22 +206,35 @@ namespace CyrusCustomer.Controllers
                 return BadRequest("Invalid input.");
             }
 
+            // Get the name of the user who is assigning the customers
+            var assigningUser = await _context.Users.FindAsync(Id);
+            string assigningUserName = assigningUser != null ? assigningUser.UserName : "Unknown"; // Use the UserName property as needed
+
+            // Get all assignments for the selected customers
             var existingAssignments = await _context.CustomerUserAssignments
-                .Where(cua => cua.UserId == Id).ToListAsync();
+                .Where(cua => SelectedCustomerIds.Contains(cua.CustomerId)).ToListAsync();
 
-
-
-            // Update existing assignments and track new ones
+            // For each customer, check if there are existing assignments
             foreach (var customerId in SelectedCustomerIds)
-            {// Check if the assignment already exists
+            {
+                // Check if the customer is already assigned to another user
+                var previousAssignment = existingAssignments
+                    .FirstOrDefault(cua => cua.CustomerId == customerId && cua.UserId != Id);
+
+                // If there is a previous assignment, remove it
+                if (previousAssignment != null)
+                {
+                    _context.CustomerUserAssignments.Remove(previousAssignment);
+                }
+
+                // Now, check if the current user already has an assignment for this customer
                 var existingAssignment = existingAssignments
                     .FirstOrDefault(cua => cua.CustomerId == customerId && cua.UserId == Id);
 
                 if (existingAssignment != null)
                 {
                     // Update properties of the existing assignment if needed
-                    // For example, if you have properties to update, do it here
-                    // existingAssignment.SomeProperty = newValue;
+                    existingAssignment.By = assigningUserName; // Update the "By" field
                     _context.CustomerUserAssignments.Update(existingAssignment);
                 }
                 else
@@ -237,14 +243,18 @@ namespace CyrusCustomer.Controllers
                     var assignment = new CustomerUserAssignment
                     {
                         CustomerId = customerId,
-                        UserId = Id
+                        UserId = Id,
+                        By = assigningUserName // Set the "By" field
                     };
                     _context.CustomerUserAssignments.Add(assignment);
                 }
             }
+
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
+
+
 
 
         #endregion
@@ -257,11 +267,26 @@ namespace CyrusCustomer.Controllers
             {
                 return NotFound();
             }
-            var customer = await _context.Customers.Include(c => c.Credentials).Include(c => c.Branches).FirstOrDefaultAsync(m => m.Id == id);
+            var customer = await _context.Customers
+                .Include(c=> c.Users)
+        .Include(c => c.Credentials)
+        .Include(c => c.Branches)
+        .FirstOrDefaultAsync(m => m.Id == id);
+
             if (customer == null)
             {
                 return NotFound();
             }
+
+                //// Prepare the view model
+                //var model = new CommentAndUpdateViewModel
+                //{
+                //    Id = customer.Id,
+                //    Comments = customer.Comments,
+                //    IsUpdated = customer.IsUpdated,
+                //    SelectedStatus = new List<string>() // Assuming you have a property in the Customer class to hold statuses
+                //};
+
             return View(customer);
 
         }
@@ -278,16 +303,29 @@ namespace CyrusCustomer.Controllers
 
             // Debugging: Check if model values are correctly received
 
-            var customer = await _context.Customers.FindAsync(model.Id);
+            var customer = await _context.Customers
+        .Include(c => c.Users) // Include users if you need to manipulate them
+        .FirstOrDefaultAsync(c => c.Id == model.Id);
+
             if (customer == null)
             {
                 return NotFound();
             }
+            
 
             // Update the customer's properties
             customer.Comments = model.Comments;
             customer.IsUpdated = model.IsUpdated;
-
+            customer.Status = model.Status; 
+            customer.By = model.By; 
+            if(model.Status == CustomerStatus.Yes)
+            {
+                var user = _context.CustomerUserAssignments.FirstOrDefault(cu => cu.CustomerId == customer.Id);
+                //var user = User;
+                var x = _context.Users.First(c => c.Email == User.FindFirstValue(ClaimTypes.Email));
+                user.UserId  = x.Id;
+                _context.SaveChanges();
+            }
             // Save changes to the database
             _context.Update(customer);
             await _context.SaveChangesAsync();
@@ -819,6 +857,64 @@ namespace CyrusCustomer.Controllers
 
             return RedirectToAction("Index", "Customer");
 
+        }
+        #endregion
+
+
+        #region Manage Users
+
+        public IActionResult ManageUsers()
+        {
+            var users = _userManager.Users.ToList();
+            return View(users);
+        }
+
+        #endregion
+
+
+        #region Change Password
+        [HttpGet]
+        public async Task<IActionResult> ChangePassword(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new ChangePasswordViewModel { UserId = user.Id, Email = user.Email };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+    var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                // Set success message in TempData
+                TempData["SuccessMessage"] = "Password changed successfully!";
+                return RedirectToAction(nameof(ManageUsers)); // Redirect to the page you want after password change
+            }
+
+            // Add errors if password change failed
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View(model);
         }
         #endregion
 

@@ -1,4 +1,5 @@
-﻿@model CyrusCustomer.Domain.Models.Customer
+﻿@using CyrusCustomer.Domain.Models
+@model CyrusCustomer.Domain.Models.Customer
 
 @{
     ViewData["Title"] = "Customer Details";
@@ -121,6 +122,24 @@
         <input asp-for="IsUpdated" class="form-check-input" type="checkbox" />
         <label asp-for="IsUpdated" class="form-check-label">Updated</label>
     </div>
+
+    <!-- Dropdown for Status -->
+<div class="form-group">
+    <label asp-for="Status">Select Status</label>
+    <select asp-for="Status" class="form-control">
+        @* <option value="">--Select Status--</option> *@
+        @foreach (var status in Enum.GetValues(typeof(CustomerStatus)).Cast<CustomerStatus>())
+        {
+           <option value="@status.ToString()" >@status</option>
+        }
+    </select>
+</div>
+
+
+
+
+
+
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
 
@@ -142,4 +161,23 @@
             }
         </ul>
     </div>
+}
+
+
+            @section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Hide the checkboxes by default
+            $('#checkboxContainer').hide();
+
+            // Show checkboxes when a status is selected from the dropdown
+            $('#statusDropdown').change(function () {
+                if ($(this).val()) {
+                    $('#checkboxContainer').show();
+                } else {
+                    $('#checkboxContainer').hide();
+                }
+            });
+        });
+    </script>
 }
