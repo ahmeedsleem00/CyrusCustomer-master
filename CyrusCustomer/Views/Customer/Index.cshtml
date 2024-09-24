@@ -2,9 +2,8 @@
 
 @{
     ViewData["Title"] = "Customer List";
-     // var isAdmin = ViewBag.IsAdmin != null && (bool)ViewBag.IsAdmin;
 }
-<h2>@ViewData["Title"]</h2>
+<h2 style="font-family: " Dosis", sans-serif">@ViewData["Title"]</h2>
 
 @if (User.Identity.Name == "admin@Cyrus.com")
 
@@ -12,7 +11,9 @@
 <p>
     <a asp-action="Create" style="text-decoration: none;" class="btn btn-dark">Create New</a>
     <a asp-action="Upload" class="btn btn-primary" style="margin-left: 10px;">Upload Excel</a>
-     
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap" rel="stylesheet">
 
     @using (Html.BeginForm("DeleteAll", "Customer", FormMethod.Post))
     {
@@ -148,9 +149,13 @@
             <button type="submit" class="btn btn-success mt-3">Assign</button>
         @* </form> *@
     }
+
 </form>
 
-
+<!-- Displaying X customers from Y total -->
+<div class="text-center mb-3">
+    <p style="font-family: Dubai;">Displaying @Model.PaginatedCustomers.Count customers from @Model.PaginatedCustomers.TotalCount total customers</p>
+</div>
 <!-- Using JQuery -->
 
 @section Scripts 
@@ -184,6 +189,10 @@
     </script>
     }
     <!-- end of Jquery -->
+
+
+
+
 <!-- Pagination Controls -->
 
 <nav aria-label="Page navigation">
@@ -223,7 +232,10 @@
         </li>
     </ul>
 </nav>
-
+<!-- Page X from Y -->
+<div class="text-center mb-3">
+    <p>Page @Model.PaginatedCustomers.PageIndex of @Model.PaginatedCustomers.TotalPages</p>
+</div>
 <style>
     .custom-pagination .page-item .page-link {
         background-color: #1f2f3f; 
@@ -270,6 +282,12 @@
         padding: 0;
     }
 
+    .dosis-<uniquifier> {
+  font-family: "Dosis", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+}
 </style>
 
 

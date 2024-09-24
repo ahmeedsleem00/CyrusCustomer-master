@@ -131,6 +131,9 @@ namespace CyrusCustomer.Controllers
                 .Where(cua => customers.Select(c => c.Id).Contains(cua.CustomerId))
                 .ToListAsync();
 
+          
+
+
             var customerAssignmentsDict = customerAssignments
                 .GroupBy(cua => cua.CustomerId)
                 .ToDictionary(
