@@ -16,13 +16,13 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap" rel="stylesheet">
 
-    @using (Html.BeginForm("DeleteAll", "Customer", FormMethod.Post))
+  @*   @using (Html.BeginForm("DeleteAll", "Customer", FormMethod.Post))
     {
         @Html.AntiForgeryToken()
         <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete all customer data?');">
             Delete All Customer Data
         </button>
-    }
+    } *@
 </p>
 }
 
@@ -49,14 +49,19 @@
                 <th>إسم الشركة</th>
                 <th>عدد الفروع</th>
 
+           
+                <th>Updated</th>
+                <th>Status</th>
                 @if (User.Identity.Name == "admin@Cyrus.com")
                 {
-                    <th>By</th>
-                    <th>Status</th>
-                    <th>Updated</th>
-                    <th>Select CST</th>
+
+
+
+                    <th>Select <br /> CST.</th>
+                    <th>Assigned For</th>
                 }
-                <th>Status</th>
+           
+                
             </tr>
         </thead>
 
@@ -69,21 +74,18 @@
                     <td>@item.TaxId</td>
                     <td>@item.Name</td>
                     <td>@item.CountOfBranches</td>
-
-                    @if (User.Identity.Name == "admin@Cyrus.com")
-                    {
-                        <td>@item.By</td>
-                        <td>
-                            <input type="checkbox" class="form-check-input me-2" disabled @(item.IsUpdated ? "checked" : "") />
-                        </td>
-                    }
+                    @* <td>@item.By</td> *@
+                    <td>
+                        <input type="checkbox" class="form-check-input me-2" disabled @(item.IsUpdated ? "checked" : "") />
+                    </td>
+                 
                     <td>@item.Status.ToString()</td>
                     <td>
                         <div class="d-flex align-items-center">
                             @if (User.Identity.Name == "admin@Cyrus.com")
                             {
                                 <input type="checkbox" name="SelectedCustomerIds" class="form-check-input me-2" value="@item.Id" />
-                                <a asp-action="Edit" class="btn btn-success btn-sm me-2" asp-route-id="@item.Id">Edit</a>
+                                @* <a asp-action="Edit" class="btn btn-success btn-sm me-2" asp-route-id="@item.Id">Edit</a> *@
                             }
 
                             <a asp-action="Details" class="btn btn-dark btn-sm" asp-route-id="@item.Id">Details</a>

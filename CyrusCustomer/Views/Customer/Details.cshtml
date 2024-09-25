@@ -29,6 +29,7 @@
         <dd class="col-sm-10">
             @Model.CountOfBranches
         </dd>
+     
         <dt class="col-sm-2">
             اسم العميل
         </dt>
@@ -122,10 +123,14 @@
         <input asp-for="IsUpdated" class="form-check-input" type="checkbox" />
         <label asp-for="IsUpdated" class="form-check-label">Updated</label>
     </div>
-
+    <dd class="col-sm-10 pt-3">
+        <label asp-for="CountOfBranches" class="control-label"> تعديل عدد الفروع </label>
+        <input asp-for="CountOfBranches" class="form-control" />
+   
+    </dd>
     <!-- Dropdown for Status -->
 <div class="form-group">
-    <label asp-for="Status">Select Status</label>
+    <label asp-for="Status">إختار الحاله</label>
     <select asp-for="Status" class="form-control">
         @* <option value="">--Select Status--</option> *@
         @foreach (var status in Enum.GetValues(typeof(CustomerStatus)).Cast<CustomerStatus>())
@@ -145,7 +150,7 @@
 
 
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    @* <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> | *@
     <a asp-action="Index">Back to List</a>
 </div>
 

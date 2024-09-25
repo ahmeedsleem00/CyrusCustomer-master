@@ -71,27 +71,7 @@ namespace CyrusCustomer.Controllers
         #region Index and Upload and ViewBranches
 
 
-        public async Task<IActionResult> Index()
-        {
-            var user = await _userManager.GetUserAsync(User);
 
-            if (await _userManager.IsInRoleAsync(user, "Admin"))
-            {
-                var allCustomers = await _context.Customers.ToListAsync(); // Admin sees all customers
-                return View(allCustomers);
-            }
-            else
-            {
-                // Non-admin sees all customers except those with status "Yes"
-                var nonAdminCustomers = await _context.Customers
-                    .Where(c => c.Status != CustomerStatus.Yes)
-                    .ToListAsync();
-
-                return View(nonAdminCustomers);
-            }
-
-
-        }
 
 
         [HttpGet]
@@ -105,22 +85,34 @@ namespace CyrusCustomer.Controllers
             if (!isAdmin)
             {
                 var assignedCustomerIds = await _context.CustomerUserAssignments
-                    .Where(cua => cua.UserId == user.Id)
                     .Select(cua => cua.CustomerId)
                     .ToListAsync();
 
-                customersQuery = customersQuery.Where(c => assignedCustomerIds.Contains(c.Id) && c.Status != CustomerStatus.Yes);
+                customersQuery = customersQuery.Where(c => c.Status != CustomerStatus.Yes);
             }
 
             if (!string.IsNullOrEmpty(searchString))
             {
+                CustomerStatus? status = null;
+
+                if (Enum.TryParse(typeof(CustomerStatus), searchString.Trim(), true, out var parsedStatus))
+                {
+                    status = (CustomerStatus)parsedStatus;
+                }
+                var searchByStatus = _context.Customers.Select(c => c.Status).ToString();
                 customersQuery = customersQuery.Where(s => s.Name.Contains(searchString.Trim())
                                                         || s.TaxId.Contains(searchString.Trim())
                                                         || s.CountOfBranches.Contains(searchString.Trim())
                                                         || s.Month.Contains(searchString.Trim())
                                                         || s.Year.Contains(searchString.Trim())
-                                                        || s.By.Contains(searchString.Trim()));
+                                                        //|| s.By.Contains(searchString.Trim())
+                                                        || (status.HasValue && s.Status == status.Value)
+                                                        || _context.CustomerUserAssignments.Any(cua => cua.CustomerId == s.Id && _context.Users
+                                                         .Any(u => u.Id == cua.UserId && u.Email
+                                                         .Contains(searchString.Trim())))
+                                                        );
             }
+
 
             int totalRecords = await customersQuery.CountAsync();
 
@@ -317,14 +309,30 @@ namespace CyrusCustomer.Controllers
             customer.Comments = model.Comments;
             customer.IsUpdated = model.IsUpdated;
             customer.Status = model.Status; 
-            customer.By = model.By; 
+            customer.By = model.By;
+            customer.CountOfBranches = model.CountOfBranches.ToString();
             if(model.Status == CustomerStatus.Yes)
             {
                 var user = _context.CustomerUserAssignments.FirstOrDefault(cu => cu.CustomerId == customer.Id);
                 //var user = User;
-                var x = _context.Users.First(c => c.Email == User.FindFirstValue(ClaimTypes.Email));
-                user.UserId  = x.Id;
-                _context.SaveChanges();
+                //var x = _context.Users.First(c => c.Email == User.FindFirstValue(ClaimTypes.Email));
+                //user.UserId  = x.Id;
+                if (user != null)
+                {
+                    // Find the user by their email
+                    var currentUser = _context.Users
+                        .FirstOrDefault(c => c.Email == User.FindFirstValue(ClaimTypes.Email));
+
+                    if (currentUser != null)
+                    {
+                        // Assign the current user's ID to the assignment
+                        user.UserId = currentUser.Id;
+
+                        // Save the changes to the database
+                        _context.SaveChanges();
+                    }
+                }
+                    //_context.SaveChanges();
             }
             // Save changes to the database
             _context.Update(customer);

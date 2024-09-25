@@ -7,6 +7,7 @@ namespace CyrusCustomer.Models
         public int Id { get; set; }
         public string Comments { get; set; } = "null";
         public bool IsUpdated { get; set; }
+        public int CountOfBranches { get; set; } // Add this property
 
         public CustomerStatus Status { get; set; }
         public string? By { get; set; }
