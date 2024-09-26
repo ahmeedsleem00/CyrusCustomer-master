@@ -1,0 +1,27 @@
+﻿@using CyrusCustomer.Domain
+@using Microsoft.AspNetCore.Identity
+@model IEnumerable<IdentityUser>
+
+<h2>Manage Users</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>UserName</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>
+                    <a href="@Url.Action("ChangePassword", new { id = user.Id })" class="btn btn-primary">Change Password</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

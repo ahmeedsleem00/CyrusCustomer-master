@@ -2,9 +2,8 @@
 
 @{
     ViewData["Title"] = "Customer List";
-     // var isAdmin = ViewBag.IsAdmin != null && (bool)ViewBag.IsAdmin;
 }
-<h2>@ViewData["Title"]</h2>
+<h2 style="font-family: " Dosis", sans-serif">@ViewData["Title"]</h2>
 
 @if (User.Identity.Name == "admin@Cyrus.com")
 
@@ -12,15 +11,18 @@
 <p>
     <a asp-action="Create" style="text-decoration: none;" class="btn btn-dark">Create New</a>
     <a asp-action="Upload" class="btn btn-primary" style="margin-left: 10px;">Upload Excel</a>
-     
 
-    @using (Html.BeginForm("DeleteAll", "Customer", FormMethod.Post))
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap" rel="stylesheet">
+
+  @*   @using (Html.BeginForm("DeleteAll", "Customer", FormMethod.Post))
     {
         @Html.AntiForgeryToken()
         <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete all customer data?');">
             Delete All Customer Data
         </button>
-    }
+    } *@
 </p>
 }
 
@@ -36,29 +38,29 @@
 
 
 
-
 <!-- Customer List with Checkboxes -->
 <form asp-action="AssignCustomers" method="post">
     <table class="table table-striped">
         <thead>
             <tr>
-               
                 <th>تاريخ الفاتورة (السنوي)</th>
-                <th>تارخ الفاتور (الشهر)</th>
+                <th>تاريخ الفاتورة (الشهر)</th>
                 <th>سجل ضريبي</th>
-                <th>إسم الشركه</th>
+                <th>إسم الشركة</th>
                 <th>عدد الفروع</th>
-                    @if (User.Identity.Name == "admin@Cyrus.com")
-
-                            {
-                <th>By</th>
-
-                <th>Status</th>
+                <th>تاريخ التحديث</th>
                 <th>Updated</th>
-                <th>Select <br /> CST.</th>
-                <th>Assigned Users</th>
-                  }
+                <th>Status</th>
+                @if (User.Identity.Name == "admin@Cyrus.com")
+                {
 
+
+
+                    <th>Select <br /> CST.</th>
+                    <th>Assigned For</th>
+                }
+           
+                
             </tr>
         </thead>
 
@@ -66,52 +68,46 @@
             @foreach (var item in Model.PaginatedCustomers)
             {
                 <tr>
-                   
                     <td>@item.Year</td>
                     <td>@item.Month</td>
                     <td>@item.TaxId</td>
                     <td>@item.Name</td>
                     <td>@item.CountOfBranches</td>
-                    @if (User.Identity.Name == "admin@Cyrus.com")
-
-                    {
-                        <td>@item.By</td>
-                        <td>@item.Status.ToString()</td>
-                        <td>
+                    <td>@item.UpdateDate</td>
+                    @* <td>@item.By</td> *@
+                    <td>
                         <input type="checkbox" class="form-check-input me-2" disabled @(item.IsUpdated ? "checked" : "") />
                     </td>
-                    }
+                 
+                    <td>@item.Status.ToString()</td>
                     <td>
                         <div class="d-flex align-items-center">
                             @if (User.Identity.Name == "admin@Cyrus.com")
-
                             {
-
                                 <input type="checkbox" name="SelectedCustomerIds" class="form-check-input me-2" value="@item.Id" />
-                                <a asp-action="Edit" class="btn btn-success btn-sm me-2" asp-route-id="@item.Id">Edit</a>
-
+                                @* <a asp-action="Edit" class="btn btn-success btn-sm me-2" asp-route-id="@item.Id">Edit</a> *@
                             }
 
                             <a asp-action="Details" class="btn btn-dark btn-sm" asp-route-id="@item.Id">Details</a>
                         </div>
                     </td>
+
                     <td>
                         @if (User.Identity.Name == "admin@Cyrus.com")
                         {
-                            
-                            }
-                        @if (Model.CustomerAssignments.ContainsKey(item.Id))
-                        {
-                            <ul>
-                                @foreach (var userId in Model.CustomerAssignments[item.Id])
-                                {
-                                    <li>@Model.Users.FirstOrDefault(u => u.Value == userId)?.Text</li>
-                                }
-                            </ul>
-                        }
-                        else
-                        {
-                            <p>No users assigned</p>
+                            @if (Model.CustomerAssignments.ContainsKey(item.Id))
+                            {
+                                <ul>
+                                    @foreach (var userId in Model.CustomerAssignments[item.Id])
+                                    {
+                                        <li>@Model.Users.FirstOrDefault(u => u.Value == userId)?.Text</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p>No users assigned</p>
+                            }
                         }
                     </td>
                 </tr>
@@ -122,7 +118,7 @@
     @if (User.Identity.Name == "admin@Cyrus.com")
 
     {
-        <!-- Submit button to assign selected customers -->
+       
         @* <form asp-action="AssignCustomers" method="post"> *@
             @if (User.Identity.Name == "admin@Cyrus.com")
             {
@@ -148,9 +144,13 @@
             <button type="submit" class="btn btn-success mt-3">Assign</button>
         @* </form> *@
     }
+
 </form>
 
-
+<!-- Displaying X customers from Y total -->
+<div class="text-center mb-3">
+    <p style="font-family: Dubai;">Displaying @Model.PaginatedCustomers.Count customers from @Model.PaginatedCustomers.TotalCount total customers</p>
+</div>
 <!-- Using JQuery -->
 
 @section Scripts 
@@ -184,6 +184,10 @@
     </script>
     }
     <!-- end of Jquery -->
+
+
+
+
 <!-- Pagination Controls -->
 
 <nav aria-label="Page navigation">
@@ -223,7 +227,10 @@
         </li>
     </ul>
 </nav>
-
+<!-- Page X from Y -->
+<div class="text-center mb-3">
+    <p>Page @Model.PaginatedCustomers.PageIndex of @Model.PaginatedCustomers.TotalPages</p>
+</div>
 <style>
     .custom-pagination .page-item .page-link {
         background-color: #1f2f3f; 
@@ -270,6 +277,12 @@
         padding: 0;
     }
 
+    .dosis-<uniquifier> {
+  font-family: "Dosis", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+}
 </style>
 
 

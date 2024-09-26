@@ -208,18 +208,12 @@ namespace CyrusCustomer.Controllers
                 {
                     await userManager.AddToRoleAsync(adminUser, "Admin");
                 }
-                //else
-                //{
-                //    // Handle failure if needed
-                //    foreach (var error in userResult.Errors)
-                //    {
-                //        // Log or display the error
-                //        Console.WriteLine($"Error creating user {adminUser.UserName}: {error.Description}");
-                //    }
-                //}
+           
             }
 
         }
+
+
 
 
 

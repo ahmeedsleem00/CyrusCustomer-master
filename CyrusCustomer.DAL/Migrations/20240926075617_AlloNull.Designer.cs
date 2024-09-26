@@ -4,6 +4,7 @@ using CyrusCustomer.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CyrusCustomer.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240926075617_AlloNull")]
+    partial class AlloNull
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,13 +98,13 @@ namespace CyrusCustomer.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<decimal?>("Amount1")
+                    b.Property<decimal>("Amount1")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("Amount2")
+                    b.Property<decimal>("Amount2")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("Amount3")
+                    b.Property<decimal>("Amount3")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("BranchName")
@@ -112,30 +114,34 @@ namespace CyrusCustomer.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CharteredAccountant")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("CharteredAccountantPhone")
+                    b.Property<long>("CharteredAccountantPhone")
                         .HasColumnType("bigint");
 
-                    b.Property<bool?>("Collected")
+                    b.Property<bool>("Collected")
                         .HasColumnType("bit");
 
                     b.Property<string>("Comments")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Contractor")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("ContractorPhoneNumber")
                         .HasColumnType("bigint");
 
                     b.Property<string>("CountOfBranches")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("InternalAccountant")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("InternalAccountantPhone")
+                    b.Property<long>("InternalAccountantPhone")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsUpdated")

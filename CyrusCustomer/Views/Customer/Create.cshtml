@@ -1,4 +1,6 @@
-﻿@model CyrusCustomer.Domain.Models.Customer
+﻿@* @model CyrusCustomer.Domain.Models.Customer *@
+@model CyrusCustomer.Models.CustomerViewModel
+
 @{
     ViewData["Title"] = "Create Customer";
 }
@@ -12,40 +14,107 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
+                <label asp-for="Name" class="control-label">إسم الشركه</label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="TaxId" class="control-label"></label>
+                <label asp-for="TaxId" class="control-label">رقم السجل الضريبي</label>
                 <input asp-for="TaxId" class="form-control" />
                 <span asp-validation-for="TaxId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Phone" class="control-label"></label>
+                <label asp-for="Phone" class="control-label">رقم الهاتف</label>
                 <input asp-for="Phone" class="form-control" />
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ResponsiblePerson" class="control-label"></label>
+                <label asp-for="ResponsiblePerson" class="control-label">الشخص المسؤول</label>
                 <input asp-for="ResponsiblePerson" class="form-control" />
                 <span asp-validation-for="ResponsiblePerson" class="text-danger"></span>
             </div>
-            <div class="form-group">
+       @*      <div class="form-group">
                 <label asp-for="UserUpdated" class="control-label"></label>
                 <input asp-for="UserUpdated" class="form-control" />
                 <span asp-validation-for="UserUpdated" class="text-danger"></span>
-            </div>
-            <div class="form-group">
+            </div> *@
+           @*  <div class="form-group">
                 <label asp-for="UpdateDate" class="control-label"></label>
                 <input asp-for="UpdateDate" class="form-control" />
                 <span asp-validation-for="UpdateDate" class="text-danger"></span>
+            </div> *@
+            <div class="form-group">
+                <label asp-for="Year" class="control-label">تاريخ الفاتورة السنوي</label>
+                <input asp-for="Year" class="form-control" />
+                <span asp-validation-for="Year" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Month" class="control-label">تاريخ الفاتورة الشهري</label>
+                <input asp-for="Month" class="form-control" />
+                <span asp-validation-for="Month" class="text-danger"></span>
+            </div>
+          @*   <div class="form-group">
+                <label asp-for="Branches" class="control-label"></label>
+                <input asp-for="Branches" class="form-control" />
+                <span asp-validation-for="Branches" class="text-danger"></span>
+            </div> *@
+            <div class="form-group">
+                <label asp-for="CountOfBranches" class="control-label"> عدد الفروع</label>
+                <input asp-for="CountOfBranches" class="form-control" />
+                <span asp-validation-for="CountOfBranches" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Contractor" class="control-label">  المتعاقد</label>
+                <input asp-for="Contractor" class="form-control" />
+                <span asp-validation-for="Contractor" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ContractorPhoneNumber" class="control-label">  ت المتعاقد</label>
+                <input asp-for="ContractorPhoneNumber" class="form-control" />
+                <span asp-validation-for="ContractorPhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="InternalAccountant" class="control-label"> محاسب داخلى</label>
+                <input asp-for="InternalAccountant" class="form-control" />
+                <span asp-validation-for="InternalAccountant" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="InternalAccountantPhone" class="control-label">  ت محاسب داخلى</label>
+                <input asp-for="InternalAccountantPhone" class="form-control" />
+                <span asp-validation-for="InternalAccountantPhone" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CharteredAccountant" class="control-label">  المحاسب القانوني</label>
+                <input asp-for="CharteredAccountant" class="form-control" />
+                <span asp-validation-for="CharteredAccountant" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CharteredAccountantPhone" class="control-label">  ت محاسب قانوني</label>
+                <input asp-for="CharteredAccountantPhone" class="form-control" />
+                <span asp-validation-for="CharteredAccountantPhone" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Amount1" class="control-label"></label>
+                <input asp-for="Amount1" class="form-control" />
+                <span asp-validation-for="Amount1" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Amount2" class="control-label"></label>
+                <input asp-for="Amount2" class="form-control" />
+                <span asp-validation-for="Amount2" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Amount3" class="control-label"></label>
+                <input asp-for="Amount3" class="form-control" />
+                <span asp-validation-for="Amount3" class="text-danger"></span>
+            </div>
+          @*   <div class="form-group">
                 <label asp-for="Notes" class="control-label"></label>
                 <textarea asp-for="Notes" class="form-control"></textarea>
                 <span asp-validation-for="Notes" class="text-danger"></span>
-            </div>
+            </div> *@
+          
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

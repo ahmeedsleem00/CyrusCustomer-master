@@ -20,18 +20,18 @@ namespace CyrusCustomer.Domain.Models
         public string Month { get; set; }
 
         //update new column from here
-        public string Contractor { get; set; }
+        public string? Contractor { get; set; }
         public long ContractorPhoneNumber { get; set; } = 0;
 
 
         //Added Default value if any of this properties return null from excel sheet
-        public string InternalAccountant { get ; set ; } = "0";
-        public long InternalAccountantPhone { get; set; } = 0;
-        public string CharteredAccountant { get; set; } = "0";
-        public long CharteredAccountantPhone { get; set; } 
+        public string? InternalAccountant { get ; set ; } = "0";
+        public long? InternalAccountantPhone { get; set; } = 0;
+        public string? CharteredAccountant { get; set; } = "0";
+        public long? CharteredAccountantPhone { get; set; } 
         public CustomerStatus Status { get; set; } //  is check box 
 
-        public string CountOfBranches { get; set; } = "0";  
+        public string? CountOfBranches { get; set; } = "0";  
         //end of update
         public string? UserUpdated { get; set; }
         public bool UpdateConfirmed { get; set; }
@@ -41,14 +41,14 @@ namespace CyrusCustomer.Domain.Models
         public CustomerUserAssignment Users { get; set; }
 
         public bool IsUpdated { get; set; } // Checkbox to indicate if updated
-        public string Comments { get; set; } = "Null";// Field to store comments
+        public string? Comments { get; set; } = "Null";// Field to store comments
 
         public virtual ICollection<Credential>? Credentials { get; set; }
         public virtual ICollection<Branch>? Branches { get; set; }
-        public decimal Amount1 { get; set; }
-        public decimal Amount2 { get; set; }
-        public decimal Amount3 { get; set; }
-        public bool Collected { get; set; }
+        public decimal? Amount1 { get; set; } = 0;
+        public decimal? Amount2 { get; set; } = 0;
+        public decimal? Amount3 { get; set; } = 0;
+        public bool? Collected { get; set; }
         public string? By { get; set; }
 
     }

@@ -18,7 +18,7 @@
     {
 
 
-        public string UserName { get; set; }
+        public string User { get; set; }
         public int Pending { get; set; }
         public int Yes { get; set; }
         public int No { get; set; }
