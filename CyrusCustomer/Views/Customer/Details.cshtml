@@ -5,171 +5,163 @@
     ViewData["Title"] = "Customer Details";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container my-5">
+    <h2 class="text-primary mb-4">@ViewData["Title"]</h2>
 
-<div>
-    <h4>Customer</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            Year
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Year
-        </dd>
-        <dt class="col-sm-2">
-            Month
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Month
-        </dd>
-        <dt class="col-sm-2">
-            عدد الفروع
-        </dt>
-        <dd class="col-sm-10">
-            @Model.CountOfBranches
-        </dd>
-     
-        <dt class="col-sm-2">
-            اسم العميل
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Name
-        </dd>
-        <dt class="col-sm-2">
-            رقم التليفون
 
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Phone
-        </dd>
-        <dt class="col-sm-2">
-            سجل ضريبي
-        </dt>
-        <dd class="col-sm-10">
-            @Model.TaxId
-        </dd>
-        <dt class="col-sm-2">
-            اسم المسؤل
-        </dt>
-        <dd class="col-sm-10">
-            @Model.ResponsiblePerson
-        </dd>
-      @*   <dt class="col-sm-2">
-            User Updated
-        </dt>
-        <dd class="col-sm-10">
-            @Model.UserUpdated
-        </dd> *@
-        <dt class="col-sm-2">
-            Update Date
-        </dt>
-        <dd class="col-sm-10">
-            @Model.UpdateDate
-        </dd>
-      @*   <dt class="col-sm-2">
-            Notes
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Notes
-        </dd> *@
-        <dt class="col-sm-2">
-            المتعاقد
 
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Contractor
-        </dd>
-        <dt class="col-sm-2">
-            رقم تليفون المتعاقد
-        </dt>
-        <dd class="col-sm-10">
-            @Model.ContractorPhoneNumber
-        </dd>
-        <dt class="col-sm-2">
-            محاسب داخلى
-        </dt>
-        <dd class="col-sm-10">
-            @Model.InternalAccountant
-        </dd>
-        <dt class="col-sm-2">
-            ت. محاسب داخلى
-        </dt>
-        <dd class="col-sm-10">
-            @Model.InternalAccountantPhone
-        </dd>
-        <dt class="col-sm-2">
-            المحاسب القانوني
-        </dt>
-        <dd class="col-sm-10">
-            @Model.CharteredAccountant
-        </dd>
-        <dt class="col-sm-2">
-            ت. المحاسب القانوني
-        </dt>
-        <dd class="col-sm-10">
-            @Model.CharteredAccountantPhone
-        </dd>
-    </dl>
+    <!-- Alert for Save Success -->
+    <div id="alertContainer" class="alert alert-success d-none" role="alert">
+        Save successful!
+    </div>
+
+
+    <!-- Custom-styled div for Customer Details -->
+    <div class="customer-details card shadow-sm">
+        <div class="card-header text-black" style="background-color:lightgrey;">
+            <h4>Customer Information</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3 font-weight-bold">Year</dt>
+                <dd class="col-sm-9">@Model.Year</dd>
+
+                <dt class="col-sm-3 font-weight-bold">Month</dt>
+                <dd class="col-sm-9">@Model.Month</dd>
+
+                <dt class="col-sm-3 font-weight-bold">عدد الفروع</dt>
+                <dd class="col-sm-9">@Model.CountOfBranches</dd>
+
+                <dt class="col-sm-3 font-weight-bold">اسم العميل</dt>
+                <dd class="col-sm-9">@Model.Name</dd>
+
+                <dt class="col-sm-3 font-weight-bold">رقم التليفون</dt>
+                <dd class="col-sm-9">@Model.Phone</dd>
+
+                <dt class="col-sm-3 font-weight-bold">سجل ضريبي</dt>
+                <dd class="col-sm-9">@Model.TaxId</dd>
+
+                <dt class="col-sm-3 font-weight-bold">اسم المسؤل</dt>
+                <dd class="col-sm-9">@Model.ResponsiblePerson</dd>
+
+                <dt class="col-sm-3 font-weight-bold">Update Date</dt>
+                <dd class="col-sm-9">@Model.UpdateDate</dd>
+
+                <dt class="col-sm-3 font-weight-bold">المتعاقد</dt>
+                <dd class="col-sm-9">@Model.Contractor</dd>
+
+                <dt class="col-sm-3 font-weight-bold">رقم تليفون المتعاقد</dt>
+                <dd class="col-sm-9">@Model.ContractorPhoneNumber</dd>
+
+                <dt class="col-sm-3 font-weight-bold">محاسب داخلى</dt>
+                <dd class="col-sm-9">@Model.InternalAccountant</dd>
+
+                <dt class="col-sm-3 font-weight-bold">ت. محاسب داخلى</dt>
+                <dd class="col-sm-9">@Model.InternalAccountantPhone</dd>
+
+                <dt class="col-sm-3 font-weight-bold">المحاسب القانوني</dt>
+                <dd class="col-sm-9">@Model.CharteredAccountant</dd>
+
+                <dt class="col-sm-3 font-weight-bold">ت. المحاسب القانوني</dt>
+                <dd class="col-sm-9">@Model.CharteredAccountantPhone</dd>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Form to Update Comments and IsUpdated -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-secondary text-white">
+            <h5>Update Customer</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="SaveCommentAndUpdate" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                
+                <div class="form-group mb-3">
+                    <label asp-for="Comments" class="form-label">Comments</label>
+                    <textarea asp-for="Comments" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="form-group form-check mb-3">
+                    <input asp-for="IsUpdated" class="form-check-input" type="checkbox" id="IsUpdated">
+                    <label asp-for="IsUpdated" class="form-check-label">Updated</label>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="CountOfBranches" class="form-label">تعديل عدد الفروع</label>
+                    <input asp-for="CountOfBranches" class="form-control" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Status" class="form-label">إختار الحاله</label>
+                    <select asp-for="Status" class="form-control">
+                        @foreach (var status in Enum.GetValues(typeof(CustomerStatus)).Cast<CustomerStatus>())
+                        {
+                            <option value="@status.ToString()">@status</option>
+                        }
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Back to List Button -->
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger mt-4">
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
 </div>
-<!-- Form to Update Comments and IsUpdated -->
-<form asp-action="SaveCommentAndUpdate" method="post">
-    <input type="hidden" name="id" value="@Model.Id" />
-    <div class="form-group">
-        <label asp-for="Comments" class="control-label">Comments</label>
-        <textarea asp-for="Comments" class="form-control"></textarea>
-    </div>
-    <div class="form-group form-check">
-        <input asp-for="IsUpdated" class="form-check-input" type="checkbox" />
-        <label asp-for="IsUpdated" class="form-check-label">Updated</label>
-    </div>
-    <dd class="col-sm-10 pt-3">
-        <label asp-for="CountOfBranches" class="control-label"> تعديل عدد الفروع </label>
-        <input asp-for="CountOfBranches" class="form-control" />
-   
-    </dd>
-    <!-- Dropdown for Status -->
-<div class="form-group">
-    <label asp-for="Status">إختار الحاله</label>
-    <select asp-for="Status" class="form-control">
-        @* <option value="">--Select Status--</option> *@
-        @foreach (var status in Enum.GetValues(typeof(CustomerStatus)).Cast<CustomerStatus>())
-        {
-           <option value="@status.ToString()" >@status</option>
+
+
+    <style>
+        /* Custom styling for the customer-details div */
+        .customer-details {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            border-radius: 10px;
         }
-    </select>
-</div>
-
-
-
-
-
-
-    <button type="submit" class="btn btn-primary">Save</button>
-</form>
-
-
-<div>
-    @* <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> | *@
-    <a asp-action="Index">Back to List</a>
-</div>
-
-
-
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger">
-        <ul>
-            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <li>@error.ErrorMessage</li>
+        
+        /* Adjust the layout on smaller screens */
+        media (max-width: 768px) {
+            .customer-details .row > dt {
+                text-align: left;
             }
-        </ul>
-    </div>
-}
+            .customer-details .row > dd {
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* Font styling for details */
+        .customer-details dt {
+            color: #495057;
+            font-weight: bold;
+        }
+        
+        .customer-details dd {
+            color: #212529;
+        }
+
+        .customer-details .card-header {
+            font-size: 1.2rem;
+        }
+    </style>
 
 
-            @section Scripts {
+
     <script>
         $(document).ready(function () {
             // Hide the checkboxes by default
@@ -185,4 +177,38 @@
             });
         });
     </script>
+
+
+@section Scripts {
+    <script>
+        function showAlert() {
+            // Show the success alert
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.classList.remove('d-none');
+
+            // Optionally, hide the alert after a few seconds
+            setTimeout(() => {
+                alertContainer.classList.add('d-none');
+            }, 4000); 
+
+            return true; 
+
+        }
+    </script>
 }
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const successMessage = '@TempData["SuccessMessage"]';
+        if (successMessage) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.classList.remove('d-none');
+            alertContainer.innerText = successMessage; // Set the success message text
+            setTimeout(() => {
+                alertContainer.classList.add('d-none');
+            }, 4000);
+        }
+    });
+
+
+</script>
+

@@ -15,8 +15,8 @@ html {
 }
 
 body {
-    margin-bottom: 60px;
-    /*background-color:white;*/
+    background-color: #f8f9fa; /* Light neutral background */
+    font-family: Arial, sans-serif;
+    color: #424242;
 }
-
 

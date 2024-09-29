@@ -29,7 +29,7 @@
 @using (Html.BeginForm("Index", "Customer", FormMethod.Get))
 {
     <div class="form-group pb-3">
-        <input type="text" name="searchString" class="form-control" placeholder="Search by Customer Name, Tax ID, Year, Month" value="@Model.SearchString" />
+        <input type="text" name="searchString" class="form-control" placeholder="Search by Customer Name, Tax ID, Year, Month , Status....." value="@Model.SearchString" />
     </div>
     <button type="submit" class="btn btn-primary">Search</button>
     <a href="@Url.Action("Index", "Customer")" class="btn btn-secondary">Reset</a>
@@ -231,58 +231,122 @@
 <div class="text-center mb-3">
     <p>Page @Model.PaginatedCustomers.PageIndex of @Model.PaginatedCustomers.TotalPages</p>
 </div>
+
+<!-- Custom CSS Styles -->
 <style>
-    .custom-pagination .page-item .page-link {
-        background-color: #1f2f3f; 
-        color: white; 
-        border: 1px solid #1f2f3f;
-        margin: 0 5px; 
+
+
+    h2 {
+        color: #424242;
+        font-size: 28px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+        .table th, .table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+
+    /*
+        .table th {
+            background-color: #f1f1f1;
+            text-align: left;
+        }
+
+       .table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        } */
+
+    .custom-btn-dark {
+        background-color: #37474f;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-btn-primary {
+        background-color: #26a69a;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-btn-secondary {
+        background-color: #78909c;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-btn-success {
+        background-color: #43a047;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+        .custom-btn-dark:hover, .custom-btn-primary:hover, .custom-btn-secondary:hover, .custom-btn-success:hover {
+            opacity: 0.85;
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+    .custom-input {
         border-radius: 5px;
-        transition: all 0.3s ease;
+        border: 1px solid #cfd8dc;
+        padding: 10px;
+        background-color: #ffffff;
     }
 
-    .custom-pagination .page-item.active .page-link {
-        background-color: white ;
-        color: black ;
-        border-color: black;
+    .custom-select {
+        border-radius: 5px;
+        border: 1px solid #cfd8dc;
+        padding: 10px;
+        background-color: #ffffff;
     }
 
-    .custom-pagination .page-item.disabled .page-link {
-        background-color: #d3d3d3; 
-        color: #6c757d; 
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        background-color: #ffffff; /* White table background */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
-    .custom-pagination .page-item .page-link:hover {
-        background-color: #2b3b4b; 
+    .custom-table-header {
+        background-color: #37474f;
         color: white;
     }
 
-    .custom-pagination .page-item.disabled .page-link:hover {
-        background-color: #d3d3d3; 
+    .custom-table td, .custom-table th {
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
     }
 
-    .custom-pagination .page-item .page-link:focus {
-        box-shadow: none; /* Remove default focus shadow */
-        outline: none; /* Remove focus outline */
+    .custom-pagination .page-item .page-link {
+        background-color: #37474f;
+        color: white;
+        border: 1px solid #37474f;
+        margin: 0 5px;
+        border-radius: 5px;
     }
 
-    /* Style for previous and next arrows */
-    .custom-pagination .page-link span[aria-hidden="true"] {
-        font-size: 1.25rem; /* Increase the size of the arrows */
-        vertical-align: middle;
+    .custom-pagination .page-item.active .page-link {
+        background-color: white;
+        color: #424242;
+        border-color: #424242;
     }
 
-    /* Additional styling for pagination */
-    .custom-pagination .page-item {
-        padding: 0;
+    .form-check-input {
+        margin-left: 0;
+        margin-right: 5px;
     }
 
-    .dosis-<uniquifier> {
-  font-family: "Dosis", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: <weight>;
-  font-style: normal;
-}
+    .form-group {
+        margin-bottom: 20px;
+    }
 </style>
-
-

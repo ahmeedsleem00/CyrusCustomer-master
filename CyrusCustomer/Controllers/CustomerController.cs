@@ -35,20 +35,28 @@ namespace CyrusCustomer.Controllers
         public async Task<IActionResult> StatusCounts()
         {
             var statusCounts = await _context.Customers
-                        .Where(c => !string.IsNullOrEmpty(c.By)) 
-                .GroupBy(c => c.By)
-                .Select(g => new StatusCountViewModel
-                {
-                    User = g.Key.ToString(),
-                    Pending = g.Where(obj=>obj.Status == CustomerStatus.Pending).Count(),
-                    Yes = g.Where(obj => obj.Status == CustomerStatus.Yes).Count(),
-                    No = g.Where(obj => obj.Status == CustomerStatus.No).Count(),
-                    Non = g.Where(obj => obj.Status == CustomerStatus.Non).Count(),
-                    NA = g.Where(obj=>obj.Status == CustomerStatus.NA).Count(), 
-                })
-                .ToListAsync();
+        .Join(_context.CustomerUserAssignments,
+            customer => customer.Id,
+            assignment => assignment.CustomerId,
+            (customer, assignment) => new { customer, assignment })
+        .Join(_context.Users,
+            ca => ca.assignment.UserId,
+            user => user.Id,
+            (ca, user) => new { ca.customer, ca.assignment, UserEmail = user.Email })
+        .GroupBy(c => c.UserEmail)
+        .Select(g => new StatusCountViewModel
+        {
+            User = g.Key, // Now this will be the email
+            Pending = g.Count(obj => obj.customer.Status == CustomerStatus.Pending),
+            Yes = g.Count(obj => obj.customer.Status == CustomerStatus.Yes),
+            No = g.Count(obj => obj.customer.Status == CustomerStatus.No),
+            Non = g.Count(obj => obj.customer.Status == CustomerStatus.Non),
+            NA = g.Count(obj => obj.customer.Status == CustomerStatus.NA),
+        })
+        .ToListAsync();
 
-      
+
+
 
             // Calculate grand total
 
@@ -86,11 +94,15 @@ namespace CyrusCustomer.Controllers
             if (!isAdmin)
             {
                 var assignedCustomerIds = await _context.CustomerUserAssignments
-                    .Select(cua => cua.CustomerId)
-                    .ToListAsync();
+                                .Where(cua => cua.UserId == user.Id) 
+                             .Select(cua => cua.CustomerId)
+                              .ToListAsync();
 
-                customersQuery = customersQuery.Where(c => c.Status != CustomerStatus.Yes);
+                customersQuery = customersQuery.Include(obj=>obj.Users)
+                    .Where( c =>  (assignedCustomerIds.Contains(c.Id)||c.Users==null) && c.Status != CustomerStatus.Yes);
+
             }
+            
 
             if (!string.IsNullOrEmpty(searchString) )
             {
@@ -113,9 +125,7 @@ namespace CyrusCustomer.Controllers
                                                         || (status.HasValue && s.Status == status.Value)
                                                         || _context.CustomerUserAssignments.Any(cua => cua.CustomerId == s.Id && _context.Users
                                                          .Any(u => u.Id == cua.UserId && u.Email
-                                                         .Contains(searchString.Trim())))
-                                                       
-                                                        );
+                                                         .Contains(searchString.Trim()))));
             }
 
            
@@ -147,7 +157,10 @@ namespace CyrusCustomer.Controllers
 
             var viewModel = new AssignViewModel
             {
-                Users = users,
+                Users = isAdmin ? _userManager.Users.Select(u => new SelectListItem
+                { 
+                    Value = u.Id, Text = u.Email
+                }) : null,
                 PaginatedCustomers = new PaginatedList<Customer>(customers, totalRecords, pageNumber, pageSize),
                 CustomerAssignments = customerAssignmentsDict,
                 SearchString = searchString,
@@ -155,6 +168,7 @@ namespace CyrusCustomer.Controllers
 
 
             };
+
 
             return View(viewModel);
         }
@@ -340,6 +354,8 @@ namespace CyrusCustomer.Controllers
                     }
                 }
             }
+            TempData["SuccessMessage"] = "Save successful!";
+
             // Save changes to the database
             _context.Update(customer);
             await _context.SaveChangesAsync();
