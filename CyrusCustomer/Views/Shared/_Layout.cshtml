@@ -62,7 +62,13 @@
 
 
                     </ul>
-             
+                    <!-- Display logged-in user -->
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <span class="navbar-text me-3">
+                            Hello, @User.Identity.Name!
+                        </span>
+                    }
 
                         @if (SignInManager.IsSignedIn(User))
                         {

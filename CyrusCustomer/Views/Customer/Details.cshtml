@@ -78,7 +78,7 @@
                 <input type="hidden" name="id" value="@Model.Id" />
                 
                 <div class="form-group mb-3">
-                    <label asp-for="Comments" class="form-label">Comments</label>
+                    <label asp-for="Comments" class="form-label"></label>
                     <textarea asp-for="Comments" class="form-control" rows="3"></textarea>
                 </div>
 
@@ -91,7 +91,14 @@
                     <label asp-for="CountOfBranches" class="form-label">تعديل عدد الفروع</label>
                     <input asp-for="CountOfBranches" class="form-control" />
                 </div>
-
+                <div class="form-group mb-3">
+                    <label asp-for="ResponsiblePerson" class="form-label">تعديل اسم الشخصس المسؤول</label>
+                    <input asp-for="ResponsiblePerson" class="form-control" />
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Phone" class="form-label">تعديل رقم الشخصس المسؤول</label>
+                    <input asp-for="Phone" class="form-control" />
+                </div>
                 <div class="form-group mb-3">
                     <label asp-for="Status" class="form-label">إختار الحاله</label>
                     <select asp-for="Status" class="form-control">

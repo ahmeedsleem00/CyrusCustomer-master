@@ -2,8 +2,18 @@
 
 @{
     ViewData["Title"] = "Customer List";
+    var successMessage = TempData["SuccessMessage"] as string;
+
 }
 <h2 style="font-family: " Dosis", sans-serif">@ViewData["Title"]</h2>
+
+
+<!-- Alert for Save Success -->
+<div id="alertContainer" class="alert alert-success d-none" role="alert">
+    Save successful!
+</div>
+
+
 
 @if (User.Identity.Name == "admin@Cyrus.com")
 
@@ -26,10 +36,25 @@
 </p>
 }
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const successMessage = '@TempData["SuccessMessage"]';
+        if (successMessage) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.classList.remove('d-none');
+            alertContainer.innerText = successMessage; // Set the success message text
+            setTimeout(() => {
+                alertContainer.classList.add('d-none');
+            }, 4000);
+        }
+    });
+</script>
+
+
 @using (Html.BeginForm("Index", "Customer", FormMethod.Get))
 {
     <div class="form-group pb-3">
-        <input type="text" name="searchString" class="form-control" placeholder="Search by Customer Name, Tax ID, Year, Month , Status....." value="@Model.SearchString" />
+        <input type="text" name="searchString" class="form-control" placeholder="Search by Customer Name, Tax ID, Year, Month, Status....." value="@Model.SearchString" />
     </div>
     <button type="submit" class="btn btn-primary">Search</button>
     <a href="@Url.Action("Index", "Customer")" class="btn btn-secondary">Reset</a>
@@ -232,6 +257,8 @@
     <p>Page @Model.PaginatedCustomers.PageIndex of @Model.PaginatedCustomers.TotalPages</p>
 </div>
 
+
+
 <!-- Custom CSS Styles -->
 <style>
 
@@ -350,3 +377,4 @@
         margin-bottom: 20px;
     }
 </style>
+

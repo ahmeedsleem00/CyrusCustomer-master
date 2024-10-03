@@ -13,6 +13,7 @@ namespace CyrusCustomer.Models
         public PaginatedList<Customer> PaginatedCustomers { get; set; }
         public Dictionary<int, List<string>> CustomerAssignments { get; set; }
         public CustomerStatus customerStatus { get; set; }
+        public bool IsSuccess { get; set; }
 
     }
 }

@@ -84,7 +84,7 @@ namespace CyrusCustomer.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Index(string searchString, string selectedUserId,  int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> Index(string searchString, string selectedUserId,  int pageNumber = 1, int pageSize = 50)
         {
             var user = await _userManager.GetUserAsync(User);
             var isAdmin = user.Email == "admin@Cyrus.com";
@@ -265,6 +265,8 @@ namespace CyrusCustomer.Controllers
             }
 
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Assign success";
+
             return RedirectToAction("Index");
         }
 

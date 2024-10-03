@@ -28,9 +28,9 @@ namespace CyrusCustomer.Controllers
         }
 
             [HttpGet]
-        //[Authorize]
-            //[Authorize(Roles = "Admin")]
-            public IActionResult Register()
+        [Authorize]
+        //[Authorize(Roles = "Admin")]
+        public IActionResult Register()
             {
             var user = User.Identity.Name;
             //if (user != "admin@Cyrus.com")
@@ -43,8 +43,8 @@ namespace CyrusCustomer.Controllers
 
             [HttpPost]
         //[Authorize(Roles = "Admin")]
-        //[Authorize]
-            public async Task<IActionResult> Register(RegisterViewModel model)
+        [Authorize]
+        public async Task<IActionResult> Register(RegisterViewModel model)
             {
             if (ModelState.IsValid)
             {
